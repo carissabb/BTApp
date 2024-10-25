@@ -1,57 +1,50 @@
 package com.example.btapp
 
 import android.os.Bundle
-import android.view.Menu
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.navigation.NavigationView
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
-import androidx.drawerlayout.widget.DrawerLayout
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.example.btapp.databinding.ActivityMainBinding
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.jaxb.JaxbConverterFactory
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityMainBinding
+    private lateinit var btApiService: BTApiService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://www.bt4uclassic.org/webservices/bt4u_webservice.asmx/") // Update to your base URL
+            .addConverterFactory(JaxbConverterFactory.create()) // Add JAXB for XML parsing
+            .build()
 
-        setSupportActionBar(binding.appBarMain.toolbar)
+        btApiService = retrofit.create(BTApiService::class.java)
 
-        binding.appBarMain.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
-        }
-        val drawerLayout: DrawerLayout = binding.drawerLayout
-        val navView: NavigationView = binding.navView
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow
-            ), drawerLayout
-        )
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
+        fetchBusRoutes()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.main, menu)
-        return true
-    }
+    private fun fetchBusRoutes() {
+        val call = btApiService.getCurrentRoutes()
+        call.enqueue(object : Callback<GetCurrentRoutesResponse> {
+            override fun onResponse(
+                call: Call<GetCurrentRoutesResponse>,
+                response: Response<GetCurrentRoutesResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val busRoutes = response.body()?.result
+                    Log.d("MainActivity", "Bus Routes: $busRoutes")
+                } else {
+                    Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
+                }
+            }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+            override fun onFailure(call: Call<GetCurrentRoutesResponse>, t: Throwable) {
+                Log.e("MainActivity", "Failed to fetch bus routes: ${t.message}")
+            }
+        })
     }
 }
