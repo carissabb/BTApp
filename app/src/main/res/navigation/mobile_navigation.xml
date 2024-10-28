@@ -3,23 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/nav_map">
 
     <fragment
-        android:id="@+id/nav_home"
-        android:name="com.example.btapp.ui.home.HomeFragment"
-        android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/nav_plan_trip"
+        android:name="com.example.btapp.ui.planTrip.PlanTripFragment"
+        android:label="@string/menu_plan_trip"
+        tools:layout="@layout/fragment_plan_trip" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.example.btapp.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        android:id="@+id/nav_map"
+        android:name="com.example.btapp.ui.map.MapFragment"
+        android:label="@string/menu_map"
+        tools:layout="@layout/fragment_map" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.example.btapp.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        android:id="@+id/nav_routes"
+        android:name="com.example.btapp.ui.routes.RoutesFragment"
+        android:label="@string/menu_routes"
+        tools:layout="@layout/fragment_routes" />
 </navigation>

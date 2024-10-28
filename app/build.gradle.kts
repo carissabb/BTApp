@@ -70,4 +70,9 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.0")
     implementation ("com.squareup.retrofit2:converter-jackson:2.9.0") // or latest version
 
+    // for bottom nav
+    implementation ("com.google.android.material:material:1.12.0")
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.8.3")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.8.3")
+
 }

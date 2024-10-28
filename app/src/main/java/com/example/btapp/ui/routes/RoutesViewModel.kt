@@ -1,13 +1,13 @@
-package com.example.btapp.ui.home
+package com.example.btapp.ui.routes
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class HomeViewModel : ViewModel() {
+class RoutesViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
-        value = "This is home Fragment"
+        value = "This is routes Fragment"
     }
     val text: LiveData<String> = _text
 }
