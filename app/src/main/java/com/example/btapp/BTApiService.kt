@@ -5,8 +5,7 @@ import retrofit2.http.GET
 
 interface BTApiService {
     @GET("/webservices/bt4u_webservice.asmx/GetCurrentRoutes")
-    //fun getCurrentRoutes(): GetCurrentRoutesResponse
-    fun getCurrentRoutes(): Call<GetCurrentRoutesResponse>
+    fun getCurrentRoutes(): Call<CurrentRoutesResponse>
 }
 
 
