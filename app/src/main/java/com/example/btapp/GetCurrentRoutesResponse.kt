@@ -1,11 +1,25 @@
 package com.example.btapp
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 
-@JsonClass(generateAdapter = true)
-data class GetCurrentRoutesResponse(
-    @Json(name = "GetCurrentRoutesResult")  // map to Json key
-    val routes: String // holds the raw XML response
+@JsonIgnoreProperties(ignoreUnknown = true) // to ignore the <CurrentRoutes> encapsulation
+
+// class to get current route data
+data class CurrentRoutesResponse(
+    @JacksonXmlProperty(localName = "RouteName")
+    val routeName: String? = null,
+
+    @JacksonXmlProperty(localName = "RouteShortName")
+    val routeShortName: String? = null,
+
+    @JacksonXmlProperty(localName = "RouteColor")
+    val routeColor: String? = null,
+
+    @JacksonXmlProperty(localName = "RouteTextColor")
+    val routeTextColor: String? = null,
+
+    @JacksonXmlProperty(localName = "RealTimeInfoAvail")
+    val realTimeInfoAvail: Boolean? = null
 )

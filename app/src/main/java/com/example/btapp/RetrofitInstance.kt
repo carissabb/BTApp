@@ -8,6 +8,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 object RetrofitInstance {
     private const val BASE_URL = "http://www.bt4uclassic.org/webservices/"
 
+    // are we using this anymore??
     private val moshi = Moshi.Builder() // create a Moshi instance
         .add(KotlinJsonAdapterFactory())
         .build()
