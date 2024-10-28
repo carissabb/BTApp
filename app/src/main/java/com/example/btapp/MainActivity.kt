@@ -29,7 +29,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = AppBarMainBinding.inflate(layoutInflater)
-        setContentView(binding.root) //R.layout.activity_main
+        //setContentView(binding.root) //R.layout.activity_main
+        setContentView(R.layout.activity_main)
 
         // for nav menu
         // Set up NavHostFragment and NavController

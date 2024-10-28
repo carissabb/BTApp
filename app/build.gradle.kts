@@ -3,18 +3,38 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+val tomtomApiKey: String by project
+
 android {
     namespace = "com.example.btapp"
     compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.btapp"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    packaging {
+
+        jniLibs.pickFirsts.add("lib/**/libc++_shared.so")
+
+    }
+
+    buildFeatures {
+
+        buildConfig = true
+
+    }
+
+    buildTypes.configureEach {
+
+        buildConfigField("String", "TOMTOM_API_KEY", "\"$tomtomApiKey\"")
+
     }
 
     buildTypes {
@@ -74,5 +94,7 @@ dependencies {
     implementation ("com.google.android.material:material:1.12.0")
     implementation ("androidx.navigation:navigation-fragment-ktx:2.8.3")
     implementation ("androidx.navigation:navigation-ui-ktx:2.8.3")
+    val version = "1.18.0"
+    implementation("com.tomtom.sdk.maps:map-display:$version")
 
 }

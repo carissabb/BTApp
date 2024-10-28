@@ -22,20 +22,15 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Fragment container for main content -->
-    <FrameLayout
-            android:id="@+id/fragment_container"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
 
-        <fragment
-            android:id="@+id/nav_host_fragment"
-            android:name="androidx.navigation.fragment.NavHostFragment"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            app:navGraph="@navigation/mobile_navigation"
-            app:defaultNavHost="true" />
+    <fragment
+        android:id="@+id/nav_host_fragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        app:navGraph="@navigation/mobile_navigation"
+        app:defaultNavHost="true" />
 
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
