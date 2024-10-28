@@ -10,7 +10,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.BTApp"
-        android:networkSecurityConfig="@xml/network_security_config"> <!-- Ensure this line is correctly placed -->
+        android:networkSecurityConfig="@xml/network_security_config">
 
         <activity android:name=".MainActivity"
             android:exported="true">

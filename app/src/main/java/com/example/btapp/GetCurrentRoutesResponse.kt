@@ -1,11 +1,11 @@
 package com.example.btapp
 
-import javax.xml.bind.annotation.XmlElement
-import javax.xml.bind.annotation.XmlRootElement
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
-@XmlRootElement(name = "GetCurrentRoutesResponse")
+
+@JsonClass(generateAdapter = true)
 data class GetCurrentRoutesResponse(
-    @field:XmlElement(name = "GetCurrentRoutesResult")
-    var result: String? = null
+    @Json(name = "GetCurrentRoutesResult")  // map to Json key
+    val routes: String // holds the raw XML response
 )
-

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">your-domain.com</domain> <!-- Replace with your actual domain -->
+        <domain includeSubdomains="true">www.bt4uclassic.org</domain>
     </domain-config>
 </network-security-config>
+
