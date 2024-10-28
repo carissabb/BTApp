@@ -48,19 +48,26 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.3")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.3")
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation ("androidx.work:work-runtime-ktx:2.9.1")
     implementation ("org.simpleframework:simple-xml:2.7.1")
     implementation ("com.squareup.retrofit2:converter-simplexml:2.9.0")
     implementation ("androidx.recyclerview:recyclerview:1.3.2")
-    implementation ("com.squareup.retrofit2:converter-jaxb:2.9.0")
-    implementation ("com.sun.xml.bind:jaxb-core:2.3.0.1")
-    //implementation 'javax.xml.bind:jaxb-api:2.3.1'
-    //implementation ("com.sun.xml.bind:jaxb-impl:2.3.1")
+    implementation ("org.json:json:20210307")
     implementation("com.google.android.libraries.mapsplatform.transportation:transportation-consumer:2.3.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    //moshi
+    implementation ("com.squareup.moshi:moshi-kotlin:1.14.0") // For Kotlin support
+    implementation ("com.squareup.moshi:moshi-kotlin-codegen:1.14.0")
+    //retrofit
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-moshi:2.9.0") // Retrofit Moshi converter
+    //jackson
+    implementation ("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.0") // Check for the latest version
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.0")
+    implementation ("com.squareup.retrofit2:converter-jackson:2.9.0") // or latest version
+
 }
