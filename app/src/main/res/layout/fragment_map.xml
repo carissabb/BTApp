@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.map.MapFragment">
+    tools:context=".ui.map.CustomMapFragment">
 
-    <!-- Use this ID to match the ID in your MapFragment.kt file -->
+    <!-- Use this ID to match the ID in your CustomMapFragment.kt file -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/map_fragment_container"
         android:layout_width="match_parent"

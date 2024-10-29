@@ -94,7 +94,7 @@ dependencies {
     implementation ("com.google.android.material:material:1.12.0")
     implementation ("androidx.navigation:navigation-fragment-ktx:2.8.3")
     implementation ("androidx.navigation:navigation-ui-ktx:2.8.3")
-    val version = "1.18.0"
+    val version = "1.18.1"
     implementation("com.tomtom.sdk.maps:map-display:$version")
 
 }

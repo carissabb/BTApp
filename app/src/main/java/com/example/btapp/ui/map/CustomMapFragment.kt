@@ -6,13 +6,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.btapp.BuildConfig
 import com.example.btapp.databinding.FragmentMapBinding
 import com.tomtom.sdk.map.display.MapOptions
 import com.tomtom.sdk.map.display.ui.MapFragment as TomTomMapFragment
 import com.tomtom.sdk.map.display.TomTomMap
+import com.tomtom.sdk.map.display.camera.CameraOptions
+import com.tomtom.sdk.location.GeoPoint
 import com.example.btapp.R
 
-class CustomMapFragment : Fragment() { // renamed to avoid name conflict
+class CustomMapFragment : Fragment() {
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
@@ -31,15 +34,13 @@ class CustomMapFragment : Fragment() { // renamed to avoid name conflict
 
         Log.d("CustomMapFragment", "MapFragment is loaded")
 
-        val mapOptions = MapOptions(mapKey = "Z8uScvfGWAph6kefoGIYKRNeUYJGhi8G")
+        val mapOptions = MapOptions(mapKey = BuildConfig.TOMTOM_API_KEY)
         val tomTomMapFragment = TomTomMapFragment.newInstance(mapOptions)
 
-        // Add the TomTomMapFragment to the container in FragmentMap layout
         childFragmentManager.beginTransaction()
-            .replace(R.id.map_fragment_container, tomTomMapFragment) // use correct ID from FragmentMap
+            .replace(R.id.map_fragment_container, tomTomMapFragment)
             .commit()
 
-        // Initialize the map once the TomTomMapFragment is ready
         tomTomMapFragment.getMapAsync { tomtomMap: TomTomMap ->
             Log.d("CustomMapFragment", "TomTom Map is initialized")
             initializeMap(tomtomMap)
@@ -47,16 +48,16 @@ class CustomMapFragment : Fragment() { // renamed to avoid name conflict
     }
 
     private fun initializeMap(tomTomMap: TomTomMap) {
-        // Example coordinates and zoom level
-        val latitude = 37.7749
-        val longitude = -122.4194
-        val zoomLevel = 12.0
 
-        // Center the map
-        tomTomMap.centerOn(latitude, longitude)
-
-        // Set the zoom level
-        tomTomMap.zoomTo(zoomLevel)
+        val blacksburg = GeoPoint(37.2249991, -80.4249983)
+        val cameraOptions =
+            CameraOptions(
+                position = blacksburg,
+                zoom = 10.0,
+                tilt = 45.0,
+                rotation = 90.0,
+            )
+        tomTomMap.moveCamera(cameraOptions)
     }
 
 

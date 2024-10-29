@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/nav_map"
-        android:name="com.example.btapp.ui.map.MapFragment"
+        android:name="com.example.btapp.ui.map.CustomMapFragment"
         android:label="@string/menu_map"
         tools:layout="@layout/fragment_map" />
 
