@@ -5,9 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.navArgs
+import androidx.navigation.fragment.findNavController
+import com.example.btapp.CurrentRoutesResponse
 import com.example.btapp.databinding.FragmentRouteDetailBinding
-import com.example.btapp.ui.routes.RouteDetailFragmentArgs
 
 class RouteDetailFragment : Fragment() {
     private var _binding: FragmentRouteDetailBinding? = null
@@ -20,12 +20,16 @@ class RouteDetailFragment : Fragment() {
     ): View {
         _binding = FragmentRouteDetailBinding.inflate(inflater, container, false)
 
+        // Back button listener
+        binding.backArrow.setOnClickListener {
+            findNavController().popBackStack()  // This will navigate back
+        }
+
         // Get the route object passed from the previous fragment
-        val args: RouteDetailFragmentArgs by navArgs()
-        val route = args.route
+        val route: CurrentRoutesResponse? = arguments?.getParcelable<CurrentRoutesResponse>("route")
 
         // Display route details
-        binding.routeDetailTextView.text = "Route Name: ${route.routeName}\nRoute Short Name: ${route.routeShortName}"
+        binding.routeDetailTextView.text = "${route?.routeShortName}"
         // Add more details as needed
 
         return binding.root

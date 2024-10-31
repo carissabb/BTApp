@@ -2,7 +2,8 @@ package com.example.btapp
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-
+import android.os.Parcel
+import android.os.Parcelable
 
 @JsonIgnoreProperties(ignoreUnknown = true) // to ignore the encapsulation (ie <CurrentRoutes>)
 
@@ -22,20 +23,37 @@ data class CurrentRoutesResponse(
 
     @JacksonXmlProperty(localName = "RealTimeInfoAvail")
     val realTimeInfoAvail: Boolean? = null
-)
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readValue(Boolean::class.java.classLoader) as? Boolean
+    )
 
-//data class CurrentRoutesResponse(
-//    val routes: List<Route>
-//)
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(routeName)
+        parcel.writeString(routeShortName)
+        parcel.writeString(routeColor)
+        parcel.writeString(routeTextColor)
+        parcel.writeValue(realTimeInfoAvail)
+    }
 
-//data class Route(
-//    val routeName: String,
-//    val routeShortName: String,
-//    val routeColor: String,
-//    val routeTextColor: String,
-//    val realTimeInfoAvail: Boolean
-//)
+    override fun describeContents(): Int {
+        return 0
+    }
 
+    companion object CREATOR : Parcelable.Creator<CurrentRoutesResponse> {
+        override fun createFromParcel(parcel: Parcel): CurrentRoutesResponse {
+            return CurrentRoutesResponse(parcel)
+        }
+
+        override fun newArray(size: Int): Array<CurrentRoutesResponse?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
 
 
 // class to get arrival and departure times for routes

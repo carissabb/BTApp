@@ -1,23 +1,20 @@
 package com.example.btapp
 
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.fasterxml.jackson.dataformat.xml.XmlMapper
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.jackson.JacksonConverterFactory
 
+// Set up Retrofit for API calls
 object RetrofitInstance {
-    private const val BASE_URL = "http://www.bt4uclassic.org/webservices/"
-
-    // are we using this anymore??
-    private val moshi = Moshi.Builder() // create a Moshi instance
-        .add(KotlinJsonAdapterFactory())
-        .build()
-
+    private val xmlMapper = XmlMapper()
     private val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .baseUrl("http://www.bt4uclassic.org/webservices/bt4u_webservice.asmx/")
+        .addConverterFactory(JacksonConverterFactory.create(xmlMapper))
         .build()
 
     val apiService: BTApiService = retrofit.create(BTApiService::class.java)
+//  val apiInterface: BTApiInterface = retrofit.create(BTApiInterface::class.java)
 }
+
+
 

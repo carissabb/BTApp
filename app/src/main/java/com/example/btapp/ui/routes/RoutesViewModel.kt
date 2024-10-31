@@ -3,11 +3,15 @@ package com.example.btapp.ui.routes
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.btapp.CurrentRoutesResponse
+
+// bridge to pass data from main to RoutesFragment
 
 class RoutesViewModel : ViewModel() {
+    private val _routesList = MutableLiveData<List<CurrentRoutesResponse>>()
+    val routesList: LiveData<List<CurrentRoutesResponse>> = _routesList
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is routes Fragment"
+    fun setRoutesList(routes: List<CurrentRoutesResponse>) {
+        _routesList.value = routes
     }
-    val text: LiveData<String> = _text
 }
