@@ -1,11 +1,29 @@
+// RouteAdapter.kt
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.btapp.BusRoute
+import com.example.btapp.CurrentRoutesResponse
 import com.example.btapp.R
 
-class RouteAdapter(private val routes: MutableList<BusRoute>, private val clickListener: (String) -> Unit) : RecyclerView.Adapter<RouteAdapter.RouteViewHolder>() {
+class RouteAdapter(
+    private val routes: List<CurrentRoutesResponse>,
+    private val onRouteClick: (CurrentRoutesResponse) -> Unit // for on-click listener
+) : RecyclerView.Adapter<RouteAdapter.RouteViewHolder>() {
+
+    inner class RouteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val routeNameTextView: TextView = itemView.findViewById(R.id.routesNameTextView)
+
+        // get route short names and append color
+        fun bind(route: CurrentRoutesResponse) {
+            routeNameTextView.text = route.routeShortName
+            val routeHexColor = "#${route.routeColor}" //append # for processing
+            routeNameTextView.setTextColor(Color.parseColor(routeHexColor))
+            itemView.setOnClickListener { onRouteClick(route) } // set on-click listener
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RouteViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_route, parent, false)
@@ -13,23 +31,8 @@ class RouteAdapter(private val routes: MutableList<BusRoute>, private val clickL
     }
 
     override fun onBindViewHolder(holder: RouteViewHolder, position: Int) {
-        val route = routes[position]
-        holder.bind(route, clickListener)
+        holder.bind(routes[position])
     }
 
-    override fun getItemCount(): Int {
-        return routes.size
-    }
-
-    fun updateRoutes(newRoutes: List<BusRoute>) {
-        routes.clear()
-        routes.addAll(newRoutes)
-        notifyDataSetChanged()
-    }
-
-    class RouteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun bind(route: BusRoute, clickListener: (String) -> Unit) {
-            itemView.setOnClickListener { clickListener(route.id) } // Use the id from BusRoute
-        }
-    }
+    override fun getItemCount() = routes.size
 }

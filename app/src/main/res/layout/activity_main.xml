@@ -28,4 +28,5 @@
         app:itemTextColor="@color/bottom_nav_item_text_color"
         app:menu="@menu/bottom_nav_menu" />
 
+
 </LinearLayout>

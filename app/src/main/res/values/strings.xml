@@ -11,4 +11,6 @@
     <string name="menu_plan_trip">Plan a Trip</string>
     <string name="menu_map">Map</string>
     <string name="menu_routes">Routes</string>
+
+    <string name="back">back</string>
 </resources>

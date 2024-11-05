@@ -21,5 +21,21 @@
         android:id="@+id/nav_routes"
         android:name="com.example.btapp.ui.routes.RoutesFragment"
         android:label="@string/menu_routes"
-        tools:layout="@layout/fragment_routes" />
+        tools:layout="@layout/fragment_routes">
+        <action
+            android:id="@+id/actionRoutesFragmentToRouteDetailFragment"
+            app:destination="@id/routeDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/routeDetailFragment"
+        android:name="com.example.btapp.ui.routes.RouteDetailFragment"
+        android:label="Route Detail"
+        tools:layout="@layout/fragment_route_detail">
+        <argument
+            android:name="route"
+            app:argType="com.example.btapp.CurrentRoutesResponse" />
+    </fragment>
+
+
 </navigation>
