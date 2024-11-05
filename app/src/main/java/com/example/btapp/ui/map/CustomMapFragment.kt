@@ -55,11 +55,9 @@ class CustomMapFragment : Fragment() {
                 position = blacksburg,
                 zoom = 10.0,
                 tilt = 45.0,
-                rotation = 90.0,
             )
         tomTomMap.moveCamera(cameraOptions)
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

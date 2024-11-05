@@ -8,7 +8,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory
 object RetrofitInstance {
     private val xmlMapper = XmlMapper()
     private val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl("http://www.bt4uclassic.org/webservices/bt4u_webservice.asmx/")
+        .baseUrl("http://www.bt4uclassic.org/")
         .addConverterFactory(JacksonConverterFactory.create(xmlMapper))
         .build()
 
