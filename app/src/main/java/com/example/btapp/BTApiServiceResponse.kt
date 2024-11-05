@@ -89,3 +89,121 @@ data class ArrivalAndDepartureTimesForRoutesResponse(
     val calculatedDepartureTime: String? = null
 
 )
+
+// Class to represent bus information from the API
+data class BusInfo(
+    @JacksonXmlProperty(localName = "AgencyVehicleName")
+    val agencyVehicleName: String? = null,
+
+    @JacksonXmlProperty(localName = "LatestEvent")
+    val latestEvent: String? = null,
+
+    @JacksonXmlProperty(localName = "Latitude")
+    val latitude: Double? = null,
+
+    @JacksonXmlProperty(localName = "Longitude")
+    val longitude: Double? = null,
+
+    @JacksonXmlProperty(localName = "Direction")
+    val direction: Int? = null,
+
+    @JacksonXmlProperty(localName = "Speed")
+    val speed: String? = null,
+
+    @JacksonXmlProperty(localName = "RouteShortName")
+    val routeShortName: String? = null,
+
+    @JacksonXmlProperty(localName = "BlockID")
+    val blockID: String? = null,
+
+    @JacksonXmlProperty(localName = "TripID")
+    val tripID: String? = null,
+
+    @JacksonXmlProperty(localName = "PatternName")
+    val patternName: String? = null,
+
+    @JacksonXmlProperty(localName = "TripStartTime")
+    val tripStartTime: String? = null,
+
+    @JacksonXmlProperty(localName = "LastStopName")
+    val lastStopName: String? = null,
+
+    @JacksonXmlProperty(localName = "StopCode")
+    val stopCode: String? = null,
+
+    @JacksonXmlProperty(localName = "Rank")
+    val rank: String? = null,
+
+    @JacksonXmlProperty(localName = "IsBusAtStop")
+    val isBusAtStop: String? = null,
+
+    @JacksonXmlProperty(localName = "IsTimePoint")
+    val isTimePoint: String? = null,
+
+    @JacksonXmlProperty(localName = "LatestRSAEvent")
+    val latestRSAEvent: String? = null,
+
+    @JacksonXmlProperty(localName = "TotalCount")
+    val totalCount: String? = null,
+
+    @JacksonXmlProperty(localName = "PercentOfCapacity")
+    val percentOfCapacity: String? = null,
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readValue(Double::class.java.classLoader) as? Double,
+        parcel.readValue(Double::class.java.classLoader) as? Double,
+        parcel.readValue(Int::class.java.classLoader) as? Int,
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString()
+    )
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(agencyVehicleName)
+        parcel.writeString(latestEvent)
+        parcel.writeValue(latitude)
+        parcel.writeValue(longitude)
+        parcel.writeValue(direction)
+        parcel.writeString(speed)
+        parcel.writeString(routeShortName)
+        parcel.writeString(blockID)
+        parcel.writeString(tripID)
+        parcel.writeString(patternName)
+        parcel.writeString(tripStartTime)
+        parcel.writeString(lastStopName)
+        parcel.writeString(stopCode)
+        parcel.writeString(rank)
+        parcel.writeString(isBusAtStop)
+        parcel.writeString(isTimePoint)
+        parcel.writeString(latestRSAEvent)
+        parcel.writeString(totalCount)
+        parcel.writeString(percentOfCapacity)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<BusInfo> {
+        override fun createFromParcel(parcel: Parcel): BusInfo {
+            return BusInfo(parcel)
+        }
+
+        override fun newArray(size: Int): Array<BusInfo?> {
+            return arrayOfNulls(size)
+        }
+    }
+}

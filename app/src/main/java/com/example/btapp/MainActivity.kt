@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.example.btapp.databinding.ActivityMainBinding
+import com.example.btapp.ui.map.CustomMapFragment
+import com.example.btapp.ui.map.MapViewModel
 import com.example.btapp.ui.routes.RoutesViewModel
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -18,8 +20,9 @@ class MainActivity : AppCompatActivity() {
     // declare variables
     private lateinit var binding: ActivityMainBinding
     var currentRoutesList: List<CurrentRoutesResponse>? = null
+    var busInfoList: List<BusInfo>? = null
     private lateinit var routesViewModel: RoutesViewModel
-
+    private lateinit var mapViewModel: MapViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,9 +36,11 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize ViewModel (Sends fetchBusRoute data for RoutesViewModel)
         routesViewModel = ViewModelProvider(this)[RoutesViewModel::class.java]
+        mapViewModel = ViewModelProvider(this)[MapViewModel::class.java]
 
         // call fetch functions
         fetchBusRoutes()
+        fetchBusData()
     }
 
 // fetch functions here
@@ -74,4 +79,37 @@ class MainActivity : AppCompatActivity() {
         })
     }
     // add rest of fetch functions here
+    private fun fetchBusData() {
+        val call = RetrofitInstance.apiService.getCurrentBusInfo()
+        call.enqueue(object : Callback<List<BusInfo>> {
+            override fun onResponse(call: Call<List<BusInfo>>, response: Response<List<BusInfo>>) {
+                if (response.isSuccessful) {
+                    response.body()?.let { busInfoList ->
+                        mapViewModel.setBusInfoList(busInfoList)
+                        busInfoList.forEach { bus ->
+                            Log.d("FetchedBus", "Agency Vehicle Name: ${bus.agencyVehicleName}, Latitude: ${bus.latitude}, Longitude: ${bus.longitude}")
+                        }
+                    }
+                } else {
+                    Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
+                }
+                /*if (response.isSuccessful) {
+                    response.body()?.let { busInfoList ->
+                        this@MainActivity.busInfoList = busInfoList // Store fetched bus info
+                        busInfoList.forEach { bus ->
+                            Log.d("FetchedBus", "Agency Vehicle Name: ${bus.agencyVehicleName}, Latitude: ${bus.latitude}, Longitude: ${bus.longitude}")
+                            val customMapFragment = supportFragmentManager.findFragmentById(R.id.nav_map) as? CustomMapFragment
+                            customMapFragment?.addBusMarker(bus)
+                        }
+                    }
+                } else {
+                    Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
+                }*/
+            }
+
+            override fun onFailure(call: Call<List<BusInfo>>, t: Throwable) {
+                Log.e("MainActivity", "Failed to fetch bus info: ${t.message}")
+            }
+        })
+    }
 }
