@@ -13,6 +13,12 @@
     <string name="menu_routes">Routes</string>
 
     <string name="back">back</string>
+    <string name="route_short_name">Route Short Name</string>
+    <string name="vehicle_name">Vehicle Name</string>
+    <string name="percent_capacity">Percent Capacity</string>
+    <string name="latest_event">Last Updated At</string>
+    <string name="last_stop_name">Last Stop</string>
+    <string name="map">Map</string>
     <string name="forward_arrow_desc">forward_arrow_desc</string>
     <string name="current_routes">Current Routes:</string>
 
