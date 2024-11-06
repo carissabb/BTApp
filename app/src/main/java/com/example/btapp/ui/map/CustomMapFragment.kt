@@ -17,24 +17,9 @@ import com.tomtom.sdk.map.display.TomTomMap
 import com.tomtom.sdk.map.display.camera.CameraOptions
 import com.tomtom.sdk.location.GeoPoint
 import com.example.btapp.R
-import com.example.btapp.RetrofitInstance
-import com.example.btapp.ui.routes.RoutesViewModel
-import com.squareup.okhttp.*
 import com.tomtom.sdk.map.display.gesture.MapPanningListener
 import com.tomtom.sdk.map.display.image.ImageFactory
-import com.tomtom.sdk.map.display.marker.Label
 import com.tomtom.sdk.map.display.marker.MarkerOptions
-import okhttp3.*
-import okhttp3.OkHttpClient
-import okio.IOException
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserFactory
-import retrofit2.Retrofit
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.converter.jackson.JacksonConverterFactory
-import java.io.StringReader
 
 class CustomMapFragment : Fragment() {
 
@@ -42,6 +27,8 @@ class CustomMapFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var tomTomMap: TomTomMap
     private lateinit var btApiService: BTApiService
+    private lateinit var tomTomMapFragment: TomTomMapFragment
+    private val vehicleInfoToMarkerMap = mutableMapOf<String, BusInfo>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,7 +47,7 @@ class CustomMapFragment : Fragment() {
         val mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java]
 
         val mapOptions = MapOptions(mapKey = BuildConfig.TOMTOM_API_KEY)
-        val tomTomMapFragment = TomTomMapFragment.newInstance(mapOptions)
+        tomTomMapFragment = TomTomMapFragment.newInstance(mapOptions)
 
         childFragmentManager.beginTransaction()
             .replace(R.id.map_fragment_container, tomTomMapFragment)
@@ -69,6 +56,7 @@ class CustomMapFragment : Fragment() {
         tomTomMapFragment.getMapAsync { map ->
             Log.d("CustomMapFragment", "TomTom Map is initialized")
             tomTomMap = map
+
             initializeMap()
             setupMapListeners()
             enableGestures()
@@ -77,7 +65,7 @@ class CustomMapFragment : Fragment() {
                     addBusMarker(bus)
                 }
             }
-            //fetchBusData()
+            tomTomMapFragment.markerBalloonViewAdapter = CustomBalloonViewAdapter(requireContext(), vehicleInfoToMarkerMap)
         }
     }
 
@@ -127,6 +115,12 @@ class CustomMapFragment : Fragment() {
                 Log.d("MapEvent", "Map Panning Ended")
             }
         })
+
+        // When a marker is clicked, show its balloon
+        tomTomMap.addMarkerClickListener { marker ->
+            marker.select()
+            Log.d("MapEvent", "Marker clicked: ${marker.balloonText}")
+        }
     }
 
     private fun enableGestures() {
@@ -136,41 +130,17 @@ class CustomMapFragment : Fragment() {
         tomTomMap.isTiltEnabled = true
     }
 
-
-    /*private fun fetchBusData() {
-        btApiService.getCurrentBusInfo().enqueue(Callback<List<BusInfo>> {
-            override fun onFailure(call: Call<List<BusInfo>>, t: Throwable) {
-                Log.e("CustomMapFragment", "Failed to fetch bus info", t)
-            }
-
-            override fun onResponse(
-                call: Call<List<BusInfo>>,
-                response: Response<List<BusInfo>>
-            ) {
-                if (response.isSuccessful) {
-                    response.body()?.let { busInfoList ->
-                        busInfoList.forEach { busInfo ->
-                            Log.d("FetchedBus", "Agency Vehicle Name: ${busInfo.agencyVehicleName}, Latitude: ${busInfo.latitude}, Longitude: ${busInfo.longitude}")
-                            // Add your logic to display the bus on the map
-                            addBusMarker(busInfo)
-                        }
-                    }
-                } else {
-                    Log.e("CustomMapFragment", "Error: ${response.errorBody()?.string()}")
-                }
-            }
-        })
-    }*/
-
-    fun addBusMarker(bus: BusInfo) {
+    private fun addBusMarker(bus: BusInfo) {
         Log.d("Add Marker Parameter", "Latitude: ${bus.latitude}, Longitude: ${bus.longitude}")
         val position = GeoPoint(bus.latitude ?: 0.0, bus.longitude ?: 0.0)
         val markerOptions = MarkerOptions(
             coordinate = position,
-            pinImage = ImageFactory.fromResource(R.drawable.ic_marker)
+            pinImage = ImageFactory.fromResource(R.drawable.ic_marker),
+            balloonText = bus.agencyVehicleName ?: "Unknown"
         )
-        //markerOptions.label = Label(bus.agencyVehicleName ?: "Unknown Bus") // Adjusting for nullable String
-        tomTomMap.addMarker(markerOptions)
+        val marker = tomTomMap.addMarker(markerOptions)
+        Log.d("MarkerInfo", "Adding marker: $marker with BusInfo: $bus")
+        vehicleInfoToMarkerMap[bus.agencyVehicleName ?: "Unknown"] = bus
     }
 
     override fun onDestroyView() {
