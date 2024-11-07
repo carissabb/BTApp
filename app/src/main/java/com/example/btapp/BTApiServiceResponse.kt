@@ -55,6 +55,9 @@ data class CurrentRoutesResponse(
     }
 }
 
+data class ArrivalDepartureRequest(
+    val routeShortName: String?
+)
 
 // class to get arrival and departure times for routes
 data class ArrivalAndDepartureTimesForRoutesResponse(
@@ -83,12 +86,58 @@ data class ArrivalAndDepartureTimesForRoutesResponse(
     val isTimePoint: String? = null,
 
     @JacksonXmlProperty(localName = "CalculatedArrivalTime")
-    val calculatedArrivalTim: String? = null,
+    val calculatedArrivalTime: String? = null,
 
     @JacksonXmlProperty(localName = "CalculatedDepartureTime")
-    val calculatedDepartureTime: String? = null
+    val calculatedDepartureTime: String? = null,
 
-)
+    @JacksonXmlProperty(localName = "RouteNotes")
+    val routeNotes: String? = null
+
+): Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString()
+    )
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(blockID)
+        parcel.writeString(tripID)
+        parcel.writeString(startTime)
+        parcel.writeString(patternName)
+        parcel.writeValue(stopName)
+        parcel.writeValue(stopCode)
+        parcel.writeValue(rank)
+        parcel.writeValue(isTimePoint)
+        parcel.writeValue(calculatedArrivalTime)
+        parcel.writeValue(calculatedDepartureTime)
+        parcel.writeValue(routeNotes)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<ArrivalAndDepartureTimesForRoutesResponse> {
+        override fun createFromParcel(parcel: Parcel): ArrivalAndDepartureTimesForRoutesResponse {
+            return ArrivalAndDepartureTimesForRoutesResponse(parcel)
+        }
+
+        override fun newArray(size: Int): Array<ArrivalAndDepartureTimesForRoutesResponse?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
+
 
 // Class to represent bus information from the API
 data class BusInfo(

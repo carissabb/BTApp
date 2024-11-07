@@ -36,9 +36,10 @@ class RoutesFragment : Fragment() {
             // Sort the routes alphabetically by routeShortName
             val sortedRoutes = routes.sortedBy { it.routeShortName }
 
+            // Set up the adapter and pass the selected route to RouteDetailFragment
             val adapter = RouteAdapter(sortedRoutes) { route ->
                 // Navigate to detail page with the clicked route
-                val bundle = Bundle().apply { putParcelable("route", route) }
+                val bundle = Bundle().apply { putParcelable("selectedRoute", route) }
                 findNavController().navigate(R.id.routeDetailFragment, bundle)
             }
 
@@ -53,7 +54,6 @@ class RoutesFragment : Fragment() {
                 }
             )
         }
-
         return root
     }
 
