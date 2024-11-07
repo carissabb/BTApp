@@ -31,8 +31,6 @@ import retrofit2.Response
 import java.time.LocalDate
 
 class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListener{
-
-class MainActivity : AppCompatActivity() {
     // declare variables
     private lateinit var binding: ActivityMainBinding
     var currentRoutesList: List<CurrentRoutesResponse>? = null
@@ -42,7 +40,6 @@ class MainActivity : AppCompatActivity() {
     private val NOTIFICATION_ID = 1;
 
 
-
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +47,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Set up NavHostFragment and NavController (for bottom navigation)
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
         NavigationUI.setupWithNavController(binding.bottomNavigation, navController)
 
@@ -72,7 +70,8 @@ class MainActivity : AppCompatActivity() {
         val descriptionText = "Channel for BTApp notifications"
         val importance = NotificationManager.IMPORTANCE_DEFAULT
         val channel = NotificationChannel(CHANNEL_ID, name, importance)
-        val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
 
@@ -114,12 +113,13 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-     override fun fetchArrivalAndDepartureTimes(routeShortName: String) {
+
+    override fun fetchArrivalAndDepartureTimes(routeShortName: String) {
         fetchArrivalAndDepartureTimesForRoutes(routeShortName)
     }
 
 
-// fetch functions here
+    // fetch functions here
     // do we want to put these in BTApiServiceFetch ??
     private fun fetchBusRoutes() {
         val call = RetrofitInstance.apiService.getCurrentRoutes()
@@ -137,7 +137,9 @@ class MainActivity : AppCompatActivity() {
 
                     // convert to object
                     val routesList: List<CurrentRoutesResponse> =
-                        jsonMapper.readValue(jsonString, object : TypeReference<List<CurrentRoutesResponse>>() {})
+                        jsonMapper.readValue(
+                            jsonString,
+                            object : TypeReference<List<CurrentRoutesResponse>>() {})
 
                     currentRoutesList = routesList
                     routesViewModel.setRoutesList(routesList) // Update ViewModel with data
@@ -149,18 +151,21 @@ class MainActivity : AppCompatActivity() {
                     Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
                 }
             }
+
             override fun onFailure(call: Call<List<CurrentRoutesResponse>>, t: Throwable) {
                 Log.e("MainActivity", "Failed to fetch bus routes: ${t.message}")
             }
         })
     }
+
     // add rest of fetch functions here
     private fun fetchArrivalAndDepartureTimesForRoutes(routeShortName: String) {
         // Define the parameters for the request
         val noOfTrips = "6" // Example value, adjust as needed
         val serviceDate: LocalDate = LocalDate.now() // Example date
 
-        val call = RetrofitInstance.apiService.getArrivalAndDepartureTimes(routeShortName, noOfTrips,
+        val call = RetrofitInstance.apiService.getArrivalAndDepartureTimes(
+            routeShortName, noOfTrips,
             serviceDate.toString()
         )
 
@@ -174,11 +179,14 @@ class MainActivity : AppCompatActivity() {
                     Log.d("FetchedRoutes", "JSON Response: $data")
 
                 } else {
-                   Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
-            }
+                    Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
+                }
             }
 
-            override fun onFailure(call: Call<List<ArrivalAndDepartureTimesForRoutesResponse>>, t: Throwable) {
+            override fun onFailure(
+                call: Call<List<ArrivalAndDepartureTimesForRoutesResponse>>,
+                t: Throwable
+            ) {
                 Log.e("MainActivity", "Failed to fetch arrival/departure times: ${t.message}")
             }
         })
@@ -192,7 +200,10 @@ class MainActivity : AppCompatActivity() {
                     response.body()?.let { busInfoList ->
                         mapViewModel.setBusInfoList(busInfoList)
                         busInfoList.forEach { bus ->
-                            Log.d("FetchedBus", "Agency Vehicle Name: ${bus.agencyVehicleName}, Latitude: ${bus.latitude}, Longitude: ${bus.longitude}")
+                            Log.d(
+                                "FetchedBus",
+                                "Agency Vehicle Name: ${bus.agencyVehicleName}, Latitude: ${bus.latitude}, Longitude: ${bus.longitude}"
+                            )
                         }
                     }
                 } else {
