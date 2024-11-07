@@ -58,8 +58,8 @@ class MainActivity : AppCompatActivity() {
         fetchBusRoutes()
         fetchBusData()
 
-        createNotificationChannel()
-        showNotification()
+        //createNotificationChannel()
+        //showNotification()
 
     }
 
