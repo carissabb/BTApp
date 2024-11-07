@@ -1,13 +1,23 @@
 package com.example.btapp
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.example.btapp.databinding.ActivityMainBinding
-import com.example.btapp.ui.map.CustomMapFragment
 import com.example.btapp.ui.map.MapViewModel
 import com.example.btapp.ui.routes.RoutesViewModel
 import com.fasterxml.jackson.core.type.TypeReference
@@ -16,6 +26,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+
 class MainActivity : AppCompatActivity() {
     // declare variables
     private lateinit var binding: ActivityMainBinding
@@ -23,7 +34,12 @@ class MainActivity : AppCompatActivity() {
     var busInfoList: List<BusInfo>? = null
     private lateinit var routesViewModel: RoutesViewModel
     private lateinit var mapViewModel: MapViewModel
+    private val CHANNEL_ID = "BTAppChannel"
+    private val NOTIFICATION_ID = 1;
 
+
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -41,6 +57,57 @@ class MainActivity : AppCompatActivity() {
         // call fetch functions
         fetchBusRoutes()
         fetchBusData()
+
+        //createNotificationChannel()
+        showNotification()
+
+    }
+
+    private fun createNotificationChannel() {
+        val name = "BTApp Notifications"
+        val descriptionText = "Channel for BTApp notifications"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(CHANNEL_ID, name, importance)
+        val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun showNotification() {
+        // Create an intent for an activity in your app
+        val intent = Intent(this, AlertDetails::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Build the notification
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_marker)
+            .setContentTitle("Last Call!")
+            .setContentText("Last bus leaves in an hour!")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        // Check for permissions and display the notification
+        with(NotificationManagerCompat.from(this)) {
+            if (ActivityCompat.checkSelfPermission(
+                    this@MainActivity,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // Request permission (for Android 13+)
+                ActivityCompat.requestPermissions(
+                    this@MainActivity,
+                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                    0
+                )
+                return@with
+            }
+            notify(NOTIFICATION_ID, builder.build())
+        }
     }
 
 // fetch functions here
