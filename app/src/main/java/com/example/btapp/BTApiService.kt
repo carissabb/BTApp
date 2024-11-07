@@ -15,9 +15,6 @@ interface BTApiService {
     @GET("/webservices/bt4u_webservice.asmx/GetCurrentRoutes")
     fun getCurrentRoutes(): Call<List<CurrentRoutesResponse>>
 
-//    @POST("/webservices/bt4u_webservice.asmx/GetArrivalAndDepartureTimesForRoutes")
-//    fun getArrivalAndDepartureTimesForRoutes(@Body request: ArrivalDepartureRequest):
-//            Call<List<ArrivalAndDepartureTimesForRoutesResponse>>
     @FormUrlEncoded
     @POST("webservices/bt4u_webservice.asmx/GetArrivalAndDepartureTimesForRoutes")
     fun getArrivalAndDepartureTimes(

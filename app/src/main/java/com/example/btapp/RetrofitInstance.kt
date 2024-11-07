@@ -13,7 +13,6 @@ object RetrofitInstance {
         .build()
 
     val apiService: BTApiService = retrofit.create(BTApiService::class.java)
-//  val apiInterface: BTApiInterface = retrofit.create(BTApiInterface::class.java)
 }
 
 

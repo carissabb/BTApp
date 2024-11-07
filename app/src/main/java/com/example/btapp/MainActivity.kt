@@ -24,8 +24,6 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
     // declare variables
     private lateinit var binding: ActivityMainBinding
     var currentRoutesList: List<CurrentRoutesResponse>? = null
-    var arrivalAndDepartureTimesList: List<ArrivalAndDepartureTimesForRoutesResponse>? = null
-    var busInfoList: List<BusInfo>? = null
     private lateinit var routesViewModel: RoutesViewModel
     private lateinit var mapViewModel: MapViewModel
 
@@ -45,7 +43,6 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
 
         // call fetch functions
         fetchBusRoutes()
-        //getArrivalAndDepartureTimesForRoutes(route)
         fetchBusData()
 
     }
@@ -108,80 +105,16 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
                     val data = response.body()
                     Log.d("FetchedRoutes", "JSON Response: $data")
 
-
-//                    response.body()?.let { data ->
-//                        val arrivalTime = data.arrivalTime
-//                        val departureTime = data.departureTime
-//                        updateUIWithTimes(arrivalTime, departureTime)
-                    //}
                 } else {
                    Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
             }
             }
 
             override fun onFailure(call: Call<List<ArrivalAndDepartureTimesForRoutesResponse>>, t: Throwable) {
-                Log.e("MainActivity", "Failed to fetch arrival times: ${t.message}")
+                Log.e("MainActivity", "Failed to fetch arrival/departure times: ${t.message}")
             }
         })
     }
-
-
-//    private fun fetchArrivalAndDepartureTimesForRoutes(routeShortName: String) {
-//            // Prepare the request with the routeShortName
-//            val request = ArrivalDepartureRequest(routeShortName = routeShortName)
-//            // Call the API to fetch arrival and departure times
-//            val call = RetrofitInstance.apiService.getArrivalAndDepartureTimesForRoutes(request)
-//            call.enqueue(object : Callback<List<ArrivalAndDepartureTimesForRoutesResponse>> {
-//                override fun onResponse(
-//                    call: Call<List<ArrivalAndDepartureTimesForRoutesResponse>>,
-//                    response: Response<List<ArrivalAndDepartureTimesForRoutesResponse>>
-//                ) {
-//                if (response.isSuccessful) {
-//                    val timeList = response.body()
-//                    // Update the ViewModel or directly pass to the fragment if needed
-//                    // For example, store in arrivalAndDepartureTimesList or use other methods
-//                    arrivalAndDepartureTimesList = timeList
-//                    Log.d("FetchedArrivalTimes", "Times for ${routeShortName}: $timeList")
-//                } else {
-//                    Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<List<ArrivalAndDepartureTimesForRoutesResponse>>, t: Throwable) {
-//                Log.e("MainActivity", "Failed to fetch arrival times: ${t.message}")
-//            }
-//        })
-//    }
-//    private fun fetchArrivalAndDepartureTimesForRoutes() {
-//        val call = RetrofitInstance.apiService.getArrivalAndDepartureTimesForRoutes()
-//        call.enqueue(object : Callback<List<ArrivalAndDepartureTimesForRoutesResponse>> {
-//            override fun onResponse(
-//                call: Call<List<ArrivalAndDepartureTimesForRoutesResponse>>,
-//                response: Response<List<ArrivalAndDepartureTimesForRoutesResponse>>
-//            ) {
-//                if (response.isSuccessful) {
-//                    // could also make a function for this to call in each fetch instead of copy/pasting
-//                    val timeResponse = response.body()
-//                    val jsonMapper = ObjectMapper()
-//                    val jsonString = jsonMapper.writeValueAsString(timeResponse)
-//                    Log.d("FetchedArriveDepart", "JSON Response: $jsonString")
-//
-//                    // convert to object
-//                    val timeList: List<ArrivalAndDepartureTimesForRoutesResponse> =
-//                        jsonMapper.readValue(jsonString, object : TypeReference<List<ArrivalAndDepartureTimesForRoutesResponse>>() {})
-//
-//                    arrivalAndDepartureTimesList = timeList
-//                    routesViewModel.setArrivalAndDepartureTimeList(timeList) // Update ViewModel with data
-//
-//                } else {
-//                    Log.e("FetchedArriveDepart", "Error: ${response.code()} - ${response.message()}")
-//                }
-//            }
-//            override fun onFailure(call: Call<List<ArrivalAndDepartureTimesForRoutesResponse>>, t: Throwable) {
-//                Log.e("FetchedArriveDepart", "Failed to fetch Arrival and Departure Times for Routes: ${t.message}")
-//            }
-//        })
-//    }
 
     private fun fetchBusData() {
         val call = RetrofitInstance.apiService.getCurrentBusInfo()
@@ -194,9 +127,6 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
                             Log.d("FetchedBus", "Agency Vehicle Name: ${bus.agencyVehicleName}, Latitude: ${bus.latitude}, Longitude: ${bus.longitude}")
                         }
                     }
-                    //for color
-                    //mapViewModel.getRouteColor(currentRoutesList.toString())// Update ViewModel with data
-
                 } else {
                     Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
                 }
