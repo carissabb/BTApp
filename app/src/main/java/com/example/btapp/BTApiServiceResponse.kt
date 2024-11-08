@@ -60,6 +60,7 @@ data class ArrivalDepartureRequest(
 )
 
 // class to get arrival and departure times for routes
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class ArrivalAndDepartureTimesForRoutesResponse(
     @JacksonXmlProperty(localName = "BlockID")
     val blockID: String? = null,
