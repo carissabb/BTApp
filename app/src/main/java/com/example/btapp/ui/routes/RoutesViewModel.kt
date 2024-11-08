@@ -32,7 +32,7 @@ class RoutesViewModel : ViewModel() {
         _routesList.value = routes
     }
 
-    fun fetchLastBusTime(apiService: BTApiService, onResult: (Date?) -> Unit){
+    /*fun fetchLastBusTime(apiService: BTApiService, onResult: (Date?) -> Unit){
         apiService.getArrivalAndDepartureTimesForRoutes().enqueue(object : Callback<ArrivalAndDepartureTimesForRoutesResponse> {
             override fun onResponse(call: Call<ArrivalAndDepartureTimesForRoutesResponse>, response: Response<ArrivalAndDepartureTimesForRoutesResponse>) {
                 if (response.isSuccessful) {
@@ -48,7 +48,7 @@ class RoutesViewModel : ViewModel() {
                 onResult(null)
             }
         })
-    }
+    }*/
 
     private fun parseTime(timeStr: String): Date? {
         val format = SimpleDateFormat("HH:mm", Locale.getDefault())
