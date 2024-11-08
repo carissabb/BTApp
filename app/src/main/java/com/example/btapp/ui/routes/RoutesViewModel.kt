@@ -22,8 +22,6 @@ import java.util.Date
 import java.util.Locale
 
 // bridge to pass data from main to RoutesFragment
-
-
 class RoutesViewModel : ViewModel() {
     private val _routesList = MutableLiveData<List<CurrentRoutesResponse>>()
     val routesList: LiveData<List<CurrentRoutesResponse>> = _routesList
@@ -32,23 +30,30 @@ class RoutesViewModel : ViewModel() {
         _routesList.value = routes
     }
 
-    /*fun fetchLastBusTime(apiService: BTApiService, onResult: (Date?) -> Unit){
-        apiService.getArrivalAndDepartureTimesForRoutes().enqueue(object : Callback<ArrivalAndDepartureTimesForRoutesResponse> {
-            override fun onResponse(call: Call<ArrivalAndDepartureTimesForRoutesResponse>, response: Response<ArrivalAndDepartureTimesForRoutesResponse>) {
-                if (response.isSuccessful) {
-                    val calculatedDepartureTime = response.body()?.calculatedDepartureTime
-                    val lastBusTime = calculatedDepartureTime?.let { parseTime(it) }
-                    onResult(lastBusTime)
-                } else {
-                    onResult(null)
-                }
-            }
+    private val _arrivalDepartureTimeList = MutableLiveData<List<ArrivalAndDepartureTimesForRoutesResponse>>()
+    val arrivalDepartureTimesList: LiveData<List<ArrivalAndDepartureTimesForRoutesResponse>> = _arrivalDepartureTimeList
 
-            override fun onFailure(call: Call<ArrivalAndDepartureTimesForRoutesResponse>, t: Throwable) {
-                onResult(null)
-            }
-        })
-    }*/
+    fun setArrivalDepartureTimesList(arrivalDepartureTimes: List<ArrivalAndDepartureTimesForRoutesResponse>) {
+        _arrivalDepartureTimeList.value = arrivalDepartureTimes
+    }
+
+//    fun fetchLastBusTime(apiService: BTApiService, onResult: (Date?) -> Unit){
+//        apiService.getArrivalAndDepartureTimesForRoutes().enqueue(object : Callback<List<ArrivalAndDepartureTimesForRoutesResponse>> {
+//            override fun onResponse(call: Call<ArrivalAndDepartureTimesForRoutesResponse>, response: Response<List<ArrivalAndDepartureTimesForRoutesResponse>>) {
+//                if (response.isSuccessful) {
+//                    val calculatedDepartureTime = response.body()?.calculatedDepartureTime
+//                    val lastBusTime = calculatedDepartureTime?.let { parseTime(it) }
+//                    onResult(lastBusTime)
+//                } else {
+//                    onResult(null)
+//                }
+//            }
+//
+//            override fun onFailure(call: Call<ArrivalAndDepartureTimesForRoutesResponse>, t: Throwable) {
+//                onResult(null)
+//            }
+//        })
+//    }
 
     private fun parseTime(timeStr: String): Date? {
         val format = SimpleDateFormat("HH:mm", Locale.getDefault())

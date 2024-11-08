@@ -15,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
@@ -35,6 +37,7 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
     // declare variables
     private lateinit var binding: ActivityMainBinding
     var currentRoutesList: List<CurrentRoutesResponse>? = null
+    var arrivalDepartureTimeList: List<ArrivalAndDepartureTimesForRoutesResponse>? = null
     private lateinit var routesViewModel: RoutesViewModel
     private lateinit var mapViewModel: MapViewModel
     private lateinit var planTripViewModel: PlanTripViewModel
@@ -182,14 +185,27 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
                 response: Response<List<ArrivalAndDepartureTimesForRoutesResponse>>
             ) {
                 if (response.isSuccessful) {
-                    val data = response.body()
-                    Log.d("FetchedRoutes", "JSON Response: $data")
+                    val arrivalDepartureResponse = response.body()
+                    val jsonMapper = ObjectMapper()
+                    val jsonString = jsonMapper.writeValueAsString(arrivalDepartureResponse)
+                    Log.d("FetchedRoutes", "JSON Response: $jsonString")
 
+                    // convert to object
+                    val arrivalDepartureTimesList: List<ArrivalAndDepartureTimesForRoutesResponse> =
+                        jsonMapper.readValue(
+                            jsonString,
+                            object : TypeReference<List<ArrivalAndDepartureTimesForRoutesResponse>>() {})
+                    Log.d("FetchedRoutes","JSON Response object: $jsonString")
+
+                    arrivalDepartureTimeList = arrivalDepartureTimesList
+                    routesViewModel.setArrivalDepartureTimesList(arrivalDepartureTimesList) // Update ViewModel with data
+//                    arrivalDepartureTimesList.forEach { route ->
+//                        Log.d("MainActivity", "Route Short Name: ${route.patternName}")
+//                    }
                 } else {
                     Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
                 }
             }
-
             override fun onFailure(
                 call: Call<List<ArrivalAndDepartureTimesForRoutesResponse>>,
                 t: Throwable
