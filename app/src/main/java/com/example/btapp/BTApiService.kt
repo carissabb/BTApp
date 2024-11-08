@@ -25,6 +25,18 @@ interface BTApiService {
 
     @GET("/webservices/bt4u_webservice.asmx/GetCurrentBusInfo")
     fun getCurrentBusInfo(): Call<List<BusInfo>>
+
+    @GET("/webservices/bt4u_webservice.asmx/GetAllPlaces")
+    fun getAllPlaces(): Call<List<AllPlacesResponse>>
+
+    @FormUrlEncoded
+    @POST("webservices/bt4u_webservice.asmx/GetNearestStops")
+    fun getNearestStops(
+        @Field("latitude") latitude: Double,
+        @Field("longitude") longitude: Double,
+        @Field("noOfStops") noOfStops: String,
+        @Field("serviceDate") serviceDate: String
+    ): Call<List<NearestStopsResponse>>
 }
 
 

@@ -254,3 +254,112 @@ data class BusInfo(
         }
     }
 }
+
+data class AllPlacesResponse(
+    @JacksonXmlProperty(localName = "PlaceID")
+    val placeID: Int? = null,
+
+    @JacksonXmlProperty(localName = "PlaceTypesID")
+    val placeTypesID: Int? = null,
+
+    @JacksonXmlProperty(localName = "Latitude")
+    val latitude: Double? = null,
+
+    @JacksonXmlProperty(localName = "Longitude")
+    val longitude: Double? = null,
+
+    @JacksonXmlProperty(localName = "PlaceName")
+    val placeName: String? = null,
+
+    @JacksonXmlProperty(localName = "Display")
+    val display: Boolean? = null,
+
+    @JacksonXmlProperty(localName = "Version")
+    val version: String? = null
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readValue(Int::class.java.classLoader) as? Int,
+        parcel.readValue(Int::class.java.classLoader) as? Int,
+        parcel.readValue(Int::class.java.classLoader) as? Double,
+        parcel.readValue(Int::class.java.classLoader) as? Double,
+        parcel.readString(),
+        parcel.readValue(Boolean::class.java.classLoader) as? Boolean,
+        parcel.readString()
+    )
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeValue(placeID)
+        parcel.writeValue(placeTypesID)
+        parcel.writeValue(latitude)
+        parcel.writeValue(longitude)
+        parcel.writeString(placeName)
+        parcel.writeValue(display)
+        parcel.writeString(version)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<CurrentRoutesResponse> {
+        override fun createFromParcel(parcel: Parcel): CurrentRoutesResponse {
+            return CurrentRoutesResponse(parcel)
+        }
+
+        override fun newArray(size: Int): Array<CurrentRoutesResponse?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
+
+data class NearestStopsResponse(
+    @JacksonXmlProperty(localName = "StopName")
+    val stopName: String? = null,
+
+    @JacksonXmlProperty(localName = "StopCode")
+    val stopCode: Int? = null,
+
+    @JacksonXmlProperty(localName = "Feet")
+    val feet: Double? = null,
+
+    @JacksonXmlProperty(localName = "Miles")
+    val miles: Double? = null,
+
+    @JacksonXmlProperty(localName = "Latitude")
+    val latitude: Double? = null,
+
+    @JacksonXmlProperty(localName = "Longitude")
+    val longitude: Double? = null
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readString(),
+        parcel.readValue(Int::class.java.classLoader) as? Int,
+        parcel.readValue(Int::class.java.classLoader) as? Double,
+        parcel.readValue(Int::class.java.classLoader) as? Double,
+        parcel.readValue(Int::class.java.classLoader) as? Double,
+        parcel.readValue(Int::class.java.classLoader) as? Double
+    )
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(stopName)
+        parcel.writeValue(stopCode)
+        parcel.writeValue(feet)
+        parcel.writeValue(miles)
+        parcel.writeValue(latitude)
+        parcel.writeValue(longitude)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<CurrentRoutesResponse> {
+        override fun createFromParcel(parcel: Parcel): CurrentRoutesResponse {
+            return CurrentRoutesResponse(parcel)
+        }
+
+        override fun newArray(size: Int): Array<CurrentRoutesResponse?> {
+            return arrayOfNulls(size)
+        }
+    }
+}

@@ -23,6 +23,7 @@ import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.RecyclerView
 import com.example.btapp.databinding.ActivityMainBinding
 import com.example.btapp.ui.map.MapViewModel
+import com.example.btapp.ui.planTrip.PlanTripViewModel
 import com.example.btapp.ui.routes.RouteDetailFragment
 //import com.example.btapp.ui.routes.RouteDetailViewModel
 import com.example.btapp.ui.routes.RoutesViewModel
@@ -40,6 +41,7 @@ class MainActivity : AppCompatActivity(){
     var arrivalDepartureTimeList: List<ArrivalAndDepartureTimesForRoutesResponse>? = null
     private lateinit var routesViewModel: RoutesViewModel
     private lateinit var mapViewModel: MapViewModel
+    private lateinit var planTripViewModel: PlanTripViewModel
     private val CHANNEL_ID = "BTAppChannel"
     private val NOTIFICATION_ID = 1;
 
@@ -59,6 +61,7 @@ class MainActivity : AppCompatActivity(){
         // Initialize ViewModel (Sends fetchBusRoute data for RoutesViewModel)
         routesViewModel = ViewModelProvider(this)[RoutesViewModel::class.java]
         mapViewModel = ViewModelProvider(this)[MapViewModel::class.java]
+        planTripViewModel = ViewModelProvider(this)[PlanTripViewModel::class.java]
 
         // call fetch functions
         fetchBusRoutes()
@@ -68,6 +71,10 @@ class MainActivity : AppCompatActivity(){
                 Log.d("MainActivity", "selectedRouteShortName updated: $it") // Add a log to verify
                 fetchArrivalAndDepartureTimesForRoutes(it)
             }
+        }
+
+        planTripViewModel.onFetchNearestStops = { latitude, longitude, isStart ->
+            fetchNearestStops(latitude, longitude, isStart)
         }
 
         //createNotificationChannel()
@@ -218,18 +225,6 @@ class MainActivity : AppCompatActivity(){
                 } else {
                     Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
                 }
-                /*if (response.isSuccessful) {
-                    response.body()?.let { busInfoList ->
-                        this@MainActivity.busInfoList = busInfoList // Store fetched bus info
-                        busInfoList.forEach { bus ->
-                            Log.d("FetchedBus", "Agency Vehicle Name: ${bus.agencyVehicleName}, Latitude: ${bus.latitude}, Longitude: ${bus.longitude}")
-                            val customMapFragment = supportFragmentManager.findFragmentById(R.id.nav_map) as? CustomMapFragment
-                            customMapFragment?.addBusMarker(bus)
-                        }
-                    }
-                } else {
-                    Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
-                }*/
             }
 
             override fun onFailure(call: Call<List<BusInfo>>, t: Throwable) {
@@ -238,4 +233,57 @@ class MainActivity : AppCompatActivity(){
         })
     }
 
+    private fun fetchNearestStops(latitude: Double, longitude: Double, isStart: Boolean) {
+        // Define the parameters for the request
+        val noOfStops = "5" // Example value, adjust as needed
+        val serviceDate: LocalDate = LocalDate.now() // Example date
+
+        val call = RetrofitInstance.apiService.getNearestStops(
+            latitude, longitude, noOfStops,
+            serviceDate.toString()
+        )
+
+        call.enqueue(object : Callback<List<NearestStopsResponse>> {
+            override fun onResponse(
+                call: Call<List<NearestStopsResponse>>,
+                response: Response<List<NearestStopsResponse>>
+            ) {
+                if (response.isSuccessful) {
+                    response.body()?.let { nearestStopsList ->
+                        if(isStart) planTripViewModel.setStartDestinationNearestStopsList(nearestStopsList)
+                        else planTripViewModel.setEndDestinationNearestStopsList(nearestStopsList)
+                        Log.d("FetchedNearestStops", "JSON Response: ${response.body()}")
+                    }
+                } else {
+                    Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
+                }
+            }
+
+            override fun onFailure(
+                call: Call<List<NearestStopsResponse>>,
+                t: Throwable
+            ) {
+                Log.e("MainActivity", "Failed to fetch arrival/departure times: ${t.message}")
+            }
+        })
+    }
+
+    private fun fetchAllPlaces() {
+        val call = RetrofitInstance.apiService.getAllPlaces()
+        call.enqueue(object : Callback<List<AllPlacesResponse>> {
+            override fun onResponse(call: Call<List<AllPlacesResponse>>, response: Response<List<AllPlacesResponse>>) {
+                if (response.isSuccessful) {
+                    response.body()?.let { places ->
+                        Log.d("MainActivity", "All places fetched: $places")
+                    }
+                } else {
+                    Log.e("MainActivity", "Error fetching places: ${response.code()} - ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<List<AllPlacesResponse>>, t: Throwable) {
+                Log.e("MainActivity", "Failed to fetch places: ${t.message}")
+            }
+        })
+    }
 }
