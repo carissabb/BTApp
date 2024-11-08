@@ -23,4 +23,5 @@
     <string name="current_routes">Current Routes:</string>
 
     <string name="alert_details">Alert Details</string>
+    <string name="departure_time">Departure Time</string>
 </resources>

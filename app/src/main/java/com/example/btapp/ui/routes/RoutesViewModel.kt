@@ -30,12 +30,14 @@ class RoutesViewModel : ViewModel() {
         _routesList.value = routes
     }
 
+    val selectedRouteShortName = MutableLiveData<String>()
     private val _arrivalDepartureTimeList = MutableLiveData<List<ArrivalAndDepartureTimesForRoutesResponse>>()
     val arrivalDepartureTimesList: LiveData<List<ArrivalAndDepartureTimesForRoutesResponse>> = _arrivalDepartureTimeList
 
     fun setArrivalDepartureTimesList(arrivalDepartureTimes: List<ArrivalAndDepartureTimesForRoutesResponse>) {
         _arrivalDepartureTimeList.value = arrivalDepartureTimes
     }
+
 
 //    fun fetchLastBusTime(apiService: BTApiService, onResult: (Date?) -> Unit){
 //        apiService.getArrivalAndDepartureTimesForRoutes().enqueue(object : Callback<List<ArrivalAndDepartureTimesForRoutesResponse>> {
@@ -49,7 +51,7 @@ class RoutesViewModel : ViewModel() {
 //                }
 //            }
 //
-//            override fun onFailure(call: Call<ArrivalAndDepartureTimesForRoutesResponse>, t: Throwable) {
+//            override fun onFailure(call: Call<List<ArrivalAndDepartureTimesForRoutesResponse>>, t: Throwable) {
 //                onResult(null)
 //            }
 //        })
