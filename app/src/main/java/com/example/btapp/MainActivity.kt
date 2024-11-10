@@ -1,26 +1,21 @@
 package com.example.btapp
 
-import RouteAdapter
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
-import androidx.recyclerview.widget.RecyclerView
 import com.example.btapp.databinding.ActivityMainBinding
 import com.example.btapp.ui.map.MapViewModel
 import com.example.btapp.ui.planTrip.PlanTripViewModel
@@ -41,13 +36,27 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
     private lateinit var routesViewModel: RoutesViewModel
     private lateinit var mapViewModel: MapViewModel
     private lateinit var planTripViewModel: PlanTripViewModel
-    private val CHANNEL_ID = "BTAppChannel"
-    private val NOTIFICATION_ID = 1;
+    private val channelId = "BTAppChannel"
+    private val notificationId = 1;
 
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        createNotificationChannel()
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Request permission (for Android 13+)
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                0
+            )
+        } else {
+            showNotification()
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -70,8 +79,6 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
             fetchNearestStops(latitude, longitude, isStart)
         }
 
-        //createNotificationChannel()
-        //showNotification()
 
     }
 
@@ -79,13 +86,25 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
         val name = "BTApp Notifications"
         val descriptionText = "Channel for BTApp notifications"
         val importance = NotificationManager.IMPORTANCE_DEFAULT
-        val channel = NotificationChannel(CHANNEL_ID, name, importance)
+        val channel = NotificationChannel(channelId, name, importance)
         val notificationManager: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 0 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            // Permission granted, show the notification
+            showNotification()
+        }
+    }
+
+    @SuppressLint("MissingPermission")
     private fun showNotification() {
         // Create an intent for an activity in your app
         val intent = Intent(this, AlertDetails::class.java).apply {
@@ -96,30 +115,18 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
         )
 
         // Build the notification
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_marker)
             .setContentTitle("Last Call!")
             .setContentText("Last bus leaves in an hour!")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
 
         // Check for permissions and display the notification
         with(NotificationManagerCompat.from(this)) {
-            if (ActivityCompat.checkSelfPermission(
-                    this@MainActivity,
-                    android.Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // Request permission (for Android 13+)
-                ActivityCompat.requestPermissions(
-                    this@MainActivity,
-                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
-                    0
-                )
-                return@with
-            }
-            notify(NOTIFICATION_ID, builder.build())
+            notify(notificationId, builder.build())
         }
 
     }
