@@ -38,8 +38,14 @@ class RoutesFragment : Fragment() {
 
             // Set up the adapter and pass the selected route to RouteDetailFragment
             val adapter = RouteAdapter(sortedRoutes) { route ->
+                // Update selectedRouteShortName in ViewModel to trigger MainActivity observer
+                routesViewModel.selectedRouteShortName.value = route.routeShortName
+
                 // Navigate to detail page with the clicked route
-                val bundle = Bundle().apply { putParcelable("selectedRoute", route) }
+                val bundle = Bundle().apply {
+                    putParcelable("selectedRoute", route)
+                    putString("selectedRouteShortName", route.routeShortName)
+                }
                 findNavController().navigate(R.id.routeDetailFragment, bundle)
             }
 
@@ -53,6 +59,7 @@ class RoutesFragment : Fragment() {
                     context?.let { ContextCompat.getDrawable(it, R.drawable.divider)?.let { setDrawable(it) } }
                 }
             )
+
         }
         return root
     }

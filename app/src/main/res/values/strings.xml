@@ -23,6 +23,7 @@
     <string name="current_routes">Current Routes:</string>
 
     <string name="alert_details">Alert Details</string>
+    <string name="departure_time">Departure Time</string>
     <string name="enter_start_destination">Enter Start Destination</string>
     <string name="enter_end_destination">Enter End Destination</string>
     <string name="plan_trip">Plan Trip</string>

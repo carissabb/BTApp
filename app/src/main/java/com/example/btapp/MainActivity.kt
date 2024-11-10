@@ -20,6 +20,7 @@ import com.example.btapp.databinding.ActivityMainBinding
 import com.example.btapp.ui.map.MapViewModel
 import com.example.btapp.ui.planTrip.PlanTripViewModel
 import com.example.btapp.ui.routes.RouteDetailFragment
+//import com.example.btapp.ui.routes.RouteDetailViewModel
 import com.example.btapp.ui.routes.RoutesViewModel
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -28,7 +29,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.time.LocalDate
 
-class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListener{
+class MainActivity : AppCompatActivity(){
     // declare variables
     private lateinit var binding: ActivityMainBinding
     var currentRoutesList: List<CurrentRoutesResponse>? = null
@@ -74,6 +75,12 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
         // call fetch functions
         fetchBusRoutes()
         fetchBusData()
+        routesViewModel.selectedRouteShortName.observe(this) { routeShortName ->
+            routeShortName?.let {
+                Log.d("MainActivity", "selectedRouteShortName updated: $it") // Add a log to verify
+                fetchArrivalAndDepartureTimesForRoutes(it)
+            }
+        }
 
         planTripViewModel.onFetchNearestStops = { latitude, longitude, isStart ->
             fetchNearestStops(latitude, longitude, isStart)
@@ -131,11 +138,6 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
 
     }
 
-    override fun fetchArrivalAndDepartureTimes(routeShortName: String) {
-        fetchArrivalAndDepartureTimesForRoutes(routeShortName)
-    }
-
-
     // fetch functions here
     // do we want to put these in BTApiServiceFetch ??
     private fun fetchBusRoutes() {
@@ -146,7 +148,6 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
                 response: Response<List<CurrentRoutesResponse>>
             ) {
                 if (response.isSuccessful) {
-                    // could also make a function for this to call in each fetch instead of copy/pasting
                     val routeResponse = response.body()
                     val jsonMapper = ObjectMapper()
                     val jsonString = jsonMapper.writeValueAsString(routeResponse)
@@ -160,15 +161,10 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
 
                     currentRoutesList = routesList
                     routesViewModel.setRoutesList(routesList) // Update ViewModel with data
-//                    routesList.forEach { route ->
-//                        Log.d("MainActivity", "Route Short Name: ${route.routeShortName}")
-//                        Log.d("MainActivity", "Route COLOR: #${route.routeColor}")
-//                    }
                 } else {
                     Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
                 }
             }
-
             override fun onFailure(call: Call<List<CurrentRoutesResponse>>, t: Throwable) {
                 Log.e("MainActivity", "Failed to fetch bus routes: ${t.message}")
             }
@@ -179,7 +175,7 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
     private fun fetchArrivalAndDepartureTimesForRoutes(routeShortName: String) {
         // Define the parameters for the request
         val noOfTrips = "6" // Example value, adjust as needed
-        val serviceDate: LocalDate = LocalDate.now() // Example date
+        val serviceDate: LocalDate = LocalDate.now() // get today's date
 
         val call = RetrofitInstance.apiService.getArrivalAndDepartureTimes(
             routeShortName, noOfTrips,
@@ -206,9 +202,6 @@ class MainActivity : AppCompatActivity() , RouteDetailFragment.RouteDetailListen
 
                     arrivalDepartureTimeList = arrivalDepartureTimesList
                     routesViewModel.setArrivalDepartureTimesList(arrivalDepartureTimesList) // Update ViewModel with data
-//                    arrivalDepartureTimesList.forEach { route ->
-//                        Log.d("MainActivity", "Route Short Name: ${route.patternName}")
-//                    }
                 } else {
                     Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
                 }

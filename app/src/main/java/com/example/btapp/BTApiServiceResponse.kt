@@ -55,9 +55,6 @@ data class CurrentRoutesResponse(
     }
 }
 
-data class ArrivalDepartureRequest(
-    val routeShortName: String?
-)
 
 // class to get arrival and departure times for routes
 @JsonIgnoreProperties(ignoreUnknown = true)

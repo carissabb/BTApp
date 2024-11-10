@@ -44,7 +44,21 @@
 
         </androidx.appcompat.widget.Toolbar>
 
-        <!-- Additional content can be added here -->
+        <!-- For displaying departure times -->
+        <TextView
+            android:id="@+id/departureTimeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/departure_time"
+            android:textSize="16sp"/>
 
+        <!-- RecyclerView for Departure Times -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/departureTimesRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="8dp"/>
     </LinearLayout>
 </layout>
