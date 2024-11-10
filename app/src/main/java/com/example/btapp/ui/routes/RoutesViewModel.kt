@@ -37,48 +37,4 @@ class RoutesViewModel : ViewModel() {
     fun setArrivalDepartureTimesList(arrivalDepartureTimes: List<ArrivalAndDepartureTimesForRoutesResponse>) {
         _arrivalDepartureTimeList.value = arrivalDepartureTimes
     }
-
-
-//    fun fetchLastBusTime(apiService: BTApiService, onResult: (Date?) -> Unit){
-//        apiService.getArrivalAndDepartureTimesForRoutes().enqueue(object : Callback<List<ArrivalAndDepartureTimesForRoutesResponse>> {
-//            override fun onResponse(call: Call<ArrivalAndDepartureTimesForRoutesResponse>, response: Response<List<ArrivalAndDepartureTimesForRoutesResponse>>) {
-//                if (response.isSuccessful) {
-//                    val calculatedDepartureTime = response.body()?.calculatedDepartureTime
-//                    val lastBusTime = calculatedDepartureTime?.let { parseTime(it) }
-//                    onResult(lastBusTime)
-//                } else {
-//                    onResult(null)
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<List<ArrivalAndDepartureTimesForRoutesResponse>>, t: Throwable) {
-//                onResult(null)
-//            }
-//        })
-//    }
-
-    private fun parseTime(timeStr: String): Date? {
-        val format = SimpleDateFormat("HH:mm", Locale.getDefault())
-        return try {
-            format.parse(timeStr)
-        } catch (e: ParseException) {
-            null
-        }
-    }
-
-    fun scheduleBusNotification(context: Context, lastBusTime: Date?) {
-        lastBusTime?.let {
-            val calendar = Calendar.getInstance().apply {
-                time = it
-                add(Calendar.HOUR, -1)
-            }
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val intent = Intent(context, NotificationReceiver::class.java)
-            val pendingIntent =
-                PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
-        }
-    }
-
-
 }

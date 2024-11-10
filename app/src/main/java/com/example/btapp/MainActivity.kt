@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -28,6 +30,10 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.temporal.ChronoUnit
+import java.util.Locale
+import kotlin.time.Duration
 
 class MainActivity : AppCompatActivity(){
     // declare variables
@@ -55,7 +61,7 @@ class MainActivity : AppCompatActivity(){
                 0
             )
         } else {
-            showNotification()
+            //showNotification()
         }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -107,12 +113,21 @@ class MainActivity : AppCompatActivity(){
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 0 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             // Permission granted, show the notification
-            showNotification()
+            //showNotification()
         }
     }
 
     @SuppressLint("MissingPermission")
-    private fun showNotification() {
+    private fun scheduleNotificationWithDelay(delayInMillis: Long, routeName: String) {
+        // Use a Handler to introduce the delay
+        Handler(Looper.getMainLooper()).postDelayed({
+            showNotification(routeName)
+        }, delayInMillis)
+    }
+
+
+    @SuppressLint("MissingPermission")
+    private fun showNotification(routeName: String) {
         // Create an intent for an activity in your app
         val intent = Intent(this, AlertDetails::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -125,7 +140,7 @@ class MainActivity : AppCompatActivity(){
         val builder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_marker)
             .setContentTitle("Last Call!")
-            .setContentText("Last bus leaves in an hour!")
+            .setContentText("Last bus on $routeName leaves in an hour!")
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
@@ -135,6 +150,7 @@ class MainActivity : AppCompatActivity(){
         with(NotificationManagerCompat.from(this)) {
             notify(notificationId, builder.build())
         }
+
 
     }
 
@@ -174,7 +190,7 @@ class MainActivity : AppCompatActivity(){
     // add rest of fetch functions here
     private fun fetchArrivalAndDepartureTimesForRoutes(routeShortName: String) {
         // Define the parameters for the request
-        val noOfTrips = "6" // Example value, adjust as needed
+        val noOfTrips = "100" // Example value, adjust as needed
         val serviceDate: LocalDate = LocalDate.now() // get today's date
 
         val call = RetrofitInstance.apiService.getArrivalAndDepartureTimes(
@@ -202,6 +218,43 @@ class MainActivity : AppCompatActivity(){
 
                     arrivalDepartureTimeList = arrivalDepartureTimesList
                     routesViewModel.setArrivalDepartureTimesList(arrivalDepartureTimesList) // Update ViewModel with data
+
+                    var latestTime: LocalTime? = null
+                    var routeName: String? = null
+
+                    for (responseItem in arrivalDepartureTimeList!!){
+                        val routeNotes = responseItem.routeNotes
+                        routeName = responseItem.patternName
+                        val timeRegex = Regex("""(\d{1,2}):(\d{2})\s?([APMapM]{2})""")
+                        val matchResult = timeRegex.find(routeNotes ?: "")
+
+                        matchResult?.let { match ->
+                            val hour = match.groupValues[1].toInt()
+                            val minute = match.groupValues[2].toInt()
+                            val amPm = match.groupValues[3].uppercase()
+                            val timeString: String = if (amPm == "PM" && hour < 12) {
+                                "${hour + 12}:$minute"
+                            } else if (amPm == "AM" && hour == 12) {
+                                "00:$minute"
+                            } else {
+                                "$hour:$minute"
+                            }
+                            val time = LocalTime.parse(timeString)
+                            if (latestTime == null || time.isAfter(latestTime)) {
+                                latestTime = time
+                            }
+                        }
+                    }
+                    latestTime?.let { latest ->
+                        val notificationTime = latest.minusHours(1)
+                        val now = LocalTime.now()
+
+                        if (notificationTime.isAfter(now)){
+                            val delay = now.until(notificationTime, ChronoUnit.MILLIS)
+                            //Hardcode a 0 if you want to test with notification appearing immediately
+                            scheduleNotificationWithDelay(delay, routeName ?: "Unknown Route")
+                        }
+                    }
                 } else {
                     Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
                 }
