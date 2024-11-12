@@ -3,7 +3,9 @@ package com.example.btapp.ui.planTrip
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.btapp.ArrivalAndDepartureTimesForRoutesResponse
 import com.example.btapp.NearestStopsResponse
+import com.example.btapp.ScheduledRoutesResponse
 
 class PlanTripViewModel : ViewModel() {
 
@@ -26,5 +28,14 @@ class PlanTripViewModel : ViewModel() {
 
     fun setEndDestinationNearestStopsList(endDestinationNearestStopsResponse: List<NearestStopsResponse>) {
         _endDestinationNearestStopsList.value = endDestinationNearestStopsResponse
+    }
+
+    // for get scheduled routes
+    val selectedStopCode = MutableLiveData<String>()
+    private val _scheduledRouteList = MutableLiveData<List<ScheduledRoutesResponse>>()
+    val scheduledRoutesList: LiveData<List<ScheduledRoutesResponse>> = _scheduledRouteList
+
+    fun setScheduledRoutesList(scheduledRoutes: List<ScheduledRoutesResponse>) {
+        _scheduledRouteList.value = scheduledRoutes
     }
 }

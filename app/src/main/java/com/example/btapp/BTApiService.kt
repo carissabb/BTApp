@@ -23,6 +23,15 @@ interface BTApiService {
     @Field("serviceDate") serviceDate: String
     ): Call<List<ArrivalAndDepartureTimesForRoutesResponse>>
 
+
+    @FormUrlEncoded
+    @POST("webservices/bt4u_webservice.asmx/GetScheduledRoutes")
+    fun getScheduledRoutes(
+        @Field("stopCode") stopCode: String,
+        @Field("serviceDate") serviceDate: String,
+    ): Call<List<ScheduledRoutesResponse>>
+
+
     @GET("/webservices/bt4u_webservice.asmx/GetCurrentBusInfo")
     fun getCurrentBusInfo(): Call<List<BusInfo>>
 

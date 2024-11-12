@@ -29,9 +29,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
+import java.util.Date
 import java.util.Locale
 import kotlin.time.Duration
 
@@ -40,6 +42,7 @@ class MainActivity : AppCompatActivity(){
     private lateinit var binding: ActivityMainBinding
     var currentRoutesList: List<CurrentRoutesResponse>? = null
     var arrivalDepartureTimeList: List<ArrivalAndDepartureTimesForRoutesResponse>? = null
+    var scheduledRouteList: List<ScheduledRoutesResponse>? = null
     private lateinit var routesViewModel: RoutesViewModel
     private lateinit var mapViewModel: MapViewModel
     private lateinit var planTripViewModel: PlanTripViewModel
@@ -83,8 +86,15 @@ class MainActivity : AppCompatActivity(){
         fetchBusData()
         routesViewModel.selectedRouteShortName.observe(this) { routeShortName ->
             routeShortName?.let {
-                Log.d("MainActivity", "selectedRouteShortName updated: $it") // Add a log to verify
+                Log.d("MainActivity", "route times updated: $it") // Add a log to verify
                 fetchArrivalAndDepartureTimesForRoutes(it)
+            }
+        }
+
+        planTripViewModel.selectedStopCode.observe(this) { stopCode ->
+            stopCode?.let {
+                Log.d("MainActivity", "scheduled routes updated: $it") // Add a log to verify
+                fetchScheduledRoutes(it)
             }
         }
 
@@ -150,7 +160,6 @@ class MainActivity : AppCompatActivity(){
         with(NotificationManagerCompat.from(this)) {
             notify(notificationId, builder.build())
         }
-
 
     }
 
@@ -264,6 +273,49 @@ class MainActivity : AppCompatActivity(){
                 t: Throwable
             ) {
                 Log.e("MainActivity", "Failed to fetch arrival/departure times: ${t.message}")
+            }
+        })
+    }
+
+    private fun fetchScheduledRoutes(stopCode: String) {
+        // Define the parameters for the request
+        val serviceDate: LocalDate = LocalDate.now() // get today's date
+
+        val call = RetrofitInstance.apiService.getScheduledRoutes(
+            stopCode,
+            serviceDate.toString()
+        )
+
+        call.enqueue(object : Callback<List<ScheduledRoutesResponse>> {
+            override fun onResponse(
+                call: Call<List<ScheduledRoutesResponse>>,
+                response: Response<List<ScheduledRoutesResponse>>
+            ) {
+                if (response.isSuccessful) {
+                    val inputResponse = response.body()
+                    val jsonMapper = ObjectMapper()
+                    val jsonString = jsonMapper.writeValueAsString(inputResponse)
+                    Log.d("FetchScheduledRoutes", "JSON Response: $jsonString")
+
+                    // convert to object
+                    val scheduledRoutesList: List<ScheduledRoutesResponse> =
+                        jsonMapper.readValue(
+                            jsonString,
+                            object :
+                                TypeReference<List<ScheduledRoutesResponse>>() {})
+                    Log.d("FetchedScheduledRoutes", "JSON Response object: $jsonString")
+
+                    scheduledRouteList = scheduledRoutesList
+                    planTripViewModel.setScheduledRoutesList(scheduledRoutesList) // Update ViewModel with data
+                } else {
+                    Log.e("FetchedScheduledRoutes", "Error: ${response.code()} - ${response.message()}")
+                }
+            }
+            override fun onFailure(
+                call: Call<List<ScheduledRoutesResponse>>,
+                t: Throwable
+            ) {
+                Log.e("FetchedScheduledRoutes", "Failed to fetch scheduled routes: ${t.message}")
             }
         })
     }

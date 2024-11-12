@@ -121,6 +121,7 @@ class RouteDetailFragment : Fragment() {
 
         class TimeViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val stopNameText: TextView = itemView.findViewById(R.id.stopNameText)
+            val stopCodeText: TextView = itemView.findViewById(R.id.stopCodeText)
             val departureTimeText: TextView = view.findViewById(R.id.departureTimeText)
         }
 
@@ -140,6 +141,7 @@ class RouteDetailFragment : Fragment() {
 
 
             holder.stopNameText.text = time.stopName  // Set the stop name
+            holder.stopCodeText.text =  "(#${time.stopCode})" // Set the stop code
             holder.departureTimeText.text = formattedTime // Set departure time
         }
 
