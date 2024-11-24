@@ -31,6 +31,18 @@
         android:text="@string/plan_trip" />
 
     <TextView
+        android:id="@+id/route_name_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Route Name"
+        android:textSize="16sp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/stops_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+<!--    <TextView
         android:id="@+id/start_nearest_stops_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -53,4 +65,5 @@
         android:id="@+id/end_nearest_stops_recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+        -->
 </LinearLayout>

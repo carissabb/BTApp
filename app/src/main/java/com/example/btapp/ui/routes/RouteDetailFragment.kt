@@ -106,11 +106,8 @@ class RouteDetailFragment : Fragment() {
                 Log.e("RouteDetailFragment", "no times available")
             }
         }
-
-
         return binding.root
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -138,7 +135,6 @@ class RouteDetailFragment : Fragment() {
             val timeFormatter = DateTimeFormatter.ofPattern("h:mm a")
             val departureTime = ZonedDateTime.parse(time.calculatedDepartureTime, dateTimeFormatter)
             val formattedTime = departureTime.format(timeFormatter)
-
 
             holder.stopNameText.text = time.stopName  // Set the stop name
             holder.stopCodeText.text =  "(#${time.stopCode})" // Set the stop code

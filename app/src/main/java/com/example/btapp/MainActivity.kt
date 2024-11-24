@@ -160,7 +160,6 @@ class MainActivity : AppCompatActivity(){
         with(NotificationManagerCompat.from(this)) {
             notify(notificationId, builder.build())
         }
-
     }
 
     // fetch functions here
@@ -185,7 +184,7 @@ class MainActivity : AppCompatActivity(){
                             object : TypeReference<List<CurrentRoutesResponse>>() {})
 
                     currentRoutesList = routesList
-                    routesViewModel.setRoutesList(routesList) // Update ViewModel with data
+                    routesViewModel.setRoutesList(routesList) // Update routesViewModel with data
                 } else {
                     Log.e("MainActivity", "Error: ${response.code()} - ${response.message()}")
                 }

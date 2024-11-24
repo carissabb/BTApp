@@ -93,11 +93,10 @@ dependencies {
 
     // for bottom nav
     implementation ("com.google.android.material:material:1.12.0")
-    implementation ("androidx.navigation:navigation-fragment-ktx:2.8.3")
-    implementation ("androidx.navigation:navigation-ui-ktx:2.8.3")
-    val version = "1.18.1"
-    implementation("com.tomtom.sdk.maps:map-display:$version")
-    implementation ("androidx.navigation:navigation-fragment-ktx:2.8.3")
-    implementation ("androidx.navigation:navigation-ui-ktx:2.8.3")
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.8.4")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.8.4")
+
+    implementation("com.tomtom.sdk.maps:map-display:1.18.1")
+    implementation ("com.google.android.gms:play-services-location:21.3.0")
 
 }
