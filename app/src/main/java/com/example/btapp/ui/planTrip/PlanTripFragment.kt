@@ -65,120 +65,84 @@ class PlanTripFragment : Fragment() {
             }
         }
 
+//        planTripViewModel.startDestinationNearestStopsList.observe(viewLifecycleOwner) { nearestStops ->
+//            nearestStops.firstOrNull()?.stopCode?.let { stopCode ->
+//                planTripViewModel.selectedStopCode.value =
+//                    stopCode.toString()  // Trigger fetch for start stop
+//            }
+//        }
+
+        // Initialize the adapters with mutable lists
+        val startAdapter = NearestStopsAdapter(mutableListOf())
+        val endAdapter = NearestStopsAdapter(mutableListOf())
+
         planTripViewModel.startDestinationNearestStopsList.observe(viewLifecycleOwner) { nearestStops ->
-            nearestStops.firstOrNull()?.stopCode?.let { stopCode ->
-                planTripViewModel.selectedStopCode.value =
-                    stopCode.toString()  // Trigger fetch for start stop
+            // Limit to 5 nearest stops
+            val limitedStops = nearestStops.take(1) // change for out many results you want
+            val stopNames = limitedStops.mapNotNull { stop ->
+                stop.stopName?.let { "${it} (#${stop.stopCode})" }
             }
+            startAdapter.updateStops(stopNames)
         }
 
         planTripViewModel.endDestinationNearestStopsList.observe(viewLifecycleOwner) { nearestStops ->
-            nearestStops.firstOrNull()?.stopCode?.let { stopCode ->
-                planTripViewModel.selectedStopCode.value =
-                    stopCode.toString()  // Trigger fetch for end stop
+            // Limit to 5 nearest stops
+            val limitedStops = nearestStops.take(1) // change for out many results you want
+            val stopNames = limitedStops.mapNotNull { stop ->
+                stop.stopName?.let { "${it} (#${stop.stopCode})" }
             }
+            endAdapter.updateStops(stopNames)
         }
 
-
-        planTripViewModel.scheduledRoutesList.observe(viewLifecycleOwner) { scheduledRoutes ->
-            val routeNames = scheduledRoutes.mapNotNull { it.routeName }
-            val adapter = ScheduledRouteAdapter(routeNames)  // Create the adapter with the route names
-            binding.stopsRecycler.layoutManager = LinearLayoutManager(context)  // Set the LayoutManager
-            binding.stopsRecycler.adapter = adapter  // Set the adapter to RecyclerView
-        }
+        // Set the RecyclerView adapters after initializing the adapters
+        binding.startStopsRecycler.layoutManager = LinearLayoutManager(context)
+        binding.startStopsRecycler.adapter = startAdapter
+        binding.endStopsRecycler.layoutManager = LinearLayoutManager(context)
+        binding.endStopsRecycler.adapter = endAdapter  // You can later switch the adapters
 
 
-        // Initialize the adapters with mutable lists
+
+
+//        planTripViewModel.endDestinationNearestStopsList.observe(viewLifecycleOwner) { nearestStops ->
+//            nearestStops.firstOrNull()?.stopCode?.let { stopCode ->
+//                planTripViewModel.selectedStopCode.value =
+//                    stopCode.toString()  // Trigger fetch for end stop
+//            }
+//        }
+
+//        planTripViewModel.scheduledRoutesList.observe(viewLifecycleOwner) { scheduledRoutes ->
+//            val routeNames = scheduledRoutes.mapNotNull { it.routeName }
+//            val adapter = ScheduledRouteAdapter(routeNames)  // Create the adapter with the route names
+//            binding.stopsRecycler.layoutManager = LinearLayoutManager(context)  // Set the LayoutManager
+//            binding.stopsRecycler.adapter = adapter  // Set the adapter to RecyclerView
+//        }
+//
+//        // Initialize the adapters with mutable lists
 //        val startAdapter = NearestStopsAdapter(mutableListOf())
 //        val endAdapter = NearestStopsAdapter(mutableListOf())
 //
-//        binding.startNearestStopsRecycler.layoutManager = LinearLayoutManager(requireContext())
-//        binding.endNearestStopsRecycler.layoutManager = LinearLayoutManager(requireContext())
-//
-//        binding.startNearestStopsRecycler.adapter = startAdapter
-//        binding.endNearestStopsRecycler.adapter = endAdapter
-
-
-//        fun checkIfStopIsCorrectRoute(stopCode: String): Boolean {
-//
-//            // I want to check the number of stops from the current stop to the destination stop. The route with the shortest number of stops will be the best route
-//           return stopCode.toBoolean() //in validRouteCodes // `validRouteCodes` could be a list of codes for the route you're trying to take.
-//        }
-
-        // observe routes
-
-
-        // Observe start and end nearest stops lists
+//        // observe start and end nearest stops lists
 //        planTripViewModel.startDestinationNearestStopsList.observe(viewLifecycleOwner) { nearestStops ->
 //            val stopNames = nearestStops.mapNotNull { stop ->
 //                stop.stopName?.let { "${it} (#${stop.stopCode})" }
 //            }  // Use mapNotNull to filter out nulls
 //            startAdapter.updateStops(stopNames)
-
-//            if (nearestStops.isNotEmpty()) {
-//                var bestStopCode: String? = null
-//                var bestRouteMatch: Boolean =
-//                    false // You can track whether the stop matches your route requirements
+//        }
 //
-//                // Iterate through all the nearest stops
-//                for (i in nearestStops.indices) {
-//                    val stopCode = (nearestStops[i].stopCode).toString()
-//                    // Check if this stop is on the correct route or closest to the destination
-//                    val isCorrectRoute = checkIfStopIsCorrectRoute(stopCode) // You define this function
-//
-//                    // If it's a correct route, check if it is closer or better for the trip
-//                    if (isCorrectRoute) {
-//                        bestStopCode = stopCode // You can also add additional logic to select the best stop (e.g., proximity, travel time)
-//                        bestRouteMatch = true
-//                        break // Stop once you find the best match
-//                    }
-//                }
-//
-//                // Update the selected stop code if a valid stop is found
-//                if (bestRouteMatch) {
-//                    planTripViewModel.selectedStopCode.value = bestStopCode
-//                }
-//            }
-        }
-
 //        planTripViewModel.endDestinationNearestStopsList.observe(viewLifecycleOwner) { nearestStops ->
 //            val stopNames = nearestStops.mapNotNull { stop ->
 //                stop.stopName?.let { "${it} (#${stop.stopCode})" }
 //            }
 //            endAdapter.updateStops(stopNames)
+//       }
+    }
 
-//            if (nearestStops.isNotEmpty()) {
-//                var bestStopCode: String? = null
-//                var bestRouteMatch: Boolean =
-//                    false // You can track whether the stop matches your route requirements
-//
-//                // Iterate through all the nearest stops
-//                for (i in nearestStops.indices) {
-//                    val stopCode = (nearestStops[i].stopCode).toString()
-//                    // Check if this stop is on the correct route or closest to the destination
-//                    val isCorrectRoute = checkIfStopIsCorrectRoute(stopCode) // You define this function
-//
-//                    // If it's a correct route, check if it is closer or better for the trip
-//                    if (isCorrectRoute) {
-//                        bestStopCode = stopCode // You can also add additional logic to select the best stop (e.g., proximity, travel time)
-//                        bestRouteMatch = true
-//                        break // Stop once you find the best match
-//                    }
-//                }
-//
-//                // Update the selected stop code if a valid stop is found
-//                if (bestRouteMatch) {
-//                    planTripViewModel.selectedStopCode.value = bestStopCode
-//                }
-//            }
- //       }
-//    }
+    // get location lat / long
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun geocoding(destination: String, onResult: (Double, Double) -> Unit) {
         val geocoder = context?.let { Geocoder(it) }
 
-        geocoder?.getFromLocationName(destination, 1, @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-        object : Geocoder.GeocodeListener {
+        geocoder?.getFromLocationName(destination, 1,  object : Geocoder.GeocodeListener {
             override fun onGeocode(addresses: List<Address>) {
                 if (addresses.isNotEmpty()) {
                     val latitude = addresses[0].latitude
@@ -194,9 +158,3 @@ class PlanTripFragment : Fragment() {
         })
     }
 }
-
-    interface GeocodingCallback {
-        fun onGeocodeSuccess(latitude: Double, longitude: Double)
-        fun onGeocodeError(errorMessage: String?)
-    }
-

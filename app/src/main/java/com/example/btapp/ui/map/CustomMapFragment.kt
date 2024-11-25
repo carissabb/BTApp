@@ -1,6 +1,8 @@
 package com.example.btapp.ui.map
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Bundle
@@ -8,11 +10,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.btapp.BTApiService
 import com.example.btapp.BuildConfig
 import com.example.btapp.BusInfo
+import com.example.btapp.LocationUtil
 import com.example.btapp.databinding.FragmentMapBinding
 import com.tomtom.sdk.map.display.MapOptions
 import com.tomtom.sdk.map.display.ui.MapFragment as TomTomMapFragment
@@ -21,9 +25,10 @@ import com.tomtom.sdk.map.display.camera.CameraOptions
 import com.tomtom.sdk.location.GeoPoint
 import com.example.btapp.R
 import com.example.btapp.ui.routes.RoutesViewModel
-//import com.example.btapp.LocationUtil
+import com.tomtom.sdk.location.GeoLocation
 import com.tomtom.sdk.map.display.gesture.MapPanningListener
 import com.tomtom.sdk.map.display.image.ImageFactory
+import com.tomtom.sdk.map.display.location.LocationMarkerOptions
 import com.tomtom.sdk.map.display.marker.Marker
 import com.tomtom.sdk.map.display.marker.MarkerOptions
 
@@ -50,6 +55,9 @@ class CustomMapFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d("CustomMapFragment", "MapFragment is loaded")
+        // Create an instance of LocationUtil
+        val locationUtil = LocationUtil(requireContext())
+
         // Initialize ViewModels
         routesViewModel = ViewModelProvider(requireActivity())[RoutesViewModel::class.java]
         mapViewModel = ViewModelProvider(requireActivity())[MapViewModel::class.java] // add val?
@@ -67,12 +75,6 @@ class CustomMapFragment : Fragment() {
 
             // Setup map functions
             initializeMap()
-
-
-//            // Add user location marker
-//            LocationUtil.getCurrentLocation(requireContext(), tomTomMap) { userLocation ->
-//                addUserLocationMarker(userLocation)
-//            }
             setupMapListeners()
             enableGestures()
 
@@ -82,6 +84,10 @@ class CustomMapFragment : Fragment() {
                     val routeColor = getRouteColor(bus.routeShortName ?: "")
                     addBusMarker(bus, routeColor)
                 }
+            }
+            // Add user location marker
+            locationUtil.getUserCurrentLocation { userLocation ->
+                addUserLocationMarker(userLocation)
             }
             // Set the BalloonViewAdapter
             tomTomMapFragment.markerBalloonViewAdapter = CustomBalloonViewAdapter(
@@ -100,15 +106,16 @@ class CustomMapFragment : Fragment() {
         return color
     }
 
-//    private fun addUserLocationMarker(location: GeoPoint) {
-//        val markerOptions = MarkerOptions(
-//            coordinate = location,
-//            pinImage = ImageFactory.fromResource(R.drawable.ic_user_location),
-//            balloonText = "You are here"
-//        )
-//        tomTomMap.addMarker(markerOptions)
-//        Log.d("CustomMapFragment", "User location marker added at Lat=${location.latitude}, Long=${location.longitude}")
-//    }
+    // add user location icon
+    private fun addUserLocationMarker(location: GeoPoint) {
+        val markerOptions = MarkerOptions(
+            coordinate = location,
+            pinImage = ImageFactory.fromResource(R.drawable.ic_user_location),
+            balloonText = "You are here"
+        )
+        tomTomMap.addMarker(markerOptions)
+        Log.d("CustomMapFragment", "User location marker added at Lat=${location.latitude}, Long=${location.longitude}")
+    }
 
     private fun initializeMap() {
         val blacksburg = GeoPoint(37.2249991, -80.4249983)

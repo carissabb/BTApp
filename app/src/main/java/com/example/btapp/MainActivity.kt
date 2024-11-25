@@ -279,17 +279,16 @@ class MainActivity : AppCompatActivity(){
     private fun fetchScheduledRoutes(stopCode: String) {
         // Define the parameters for the request
         val serviceDate: LocalDate = LocalDate.now() // get today's date
-
         val call = RetrofitInstance.apiService.getScheduledRoutes(
             stopCode,
             serviceDate.toString()
         )
-
         call.enqueue(object : Callback<List<ScheduledRoutesResponse>> {
             override fun onResponse(
                 call: Call<List<ScheduledRoutesResponse>>,
                 response: Response<List<ScheduledRoutesResponse>>
             ) {
+                Log.d("Response", " Response: $response") // THIS NEEDS TO GET CORRECT RESPONSE
                 if (response.isSuccessful) {
                     val inputResponse = response.body()
                     val jsonMapper = ObjectMapper()
