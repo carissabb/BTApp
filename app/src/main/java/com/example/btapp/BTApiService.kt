@@ -10,7 +10,6 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 // get request from BT site to get XML API data
-
 interface BTApiService {
     @GET("/webservices/bt4u_webservice.asmx/GetCurrentRoutes")
     fun getCurrentRoutes(): Call<List<CurrentRoutesResponse>>
@@ -23,14 +22,12 @@ interface BTApiService {
     @Field("serviceDate") serviceDate: String
     ): Call<List<ArrivalAndDepartureTimesForRoutesResponse>>
 
-
     @FormUrlEncoded
     @POST("webservices/bt4u_webservice.asmx/GetScheduledRoutes")
     fun getScheduledRoutes(
         @Field("stopCode") stopCode: String,
         @Field("serviceDate") serviceDate: String,
     ): Call<List<ScheduledRoutesResponse>>
-
 
     @GET("/webservices/bt4u_webservice.asmx/GetCurrentBusInfo")
     fun getCurrentBusInfo(): Call<List<BusInfo>>
