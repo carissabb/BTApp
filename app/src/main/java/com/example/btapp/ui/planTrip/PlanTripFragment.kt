@@ -92,7 +92,6 @@ class PlanTripFragment : Fragment() {
             }
             startAdapter.updateStops(stopNames)
             calculateAndDisplayMatchingRoutes()
-
         }
 
         planTripViewModel.endDestinationNearestStopsList.observe(viewLifecycleOwner) { nearestStops ->
@@ -111,10 +110,6 @@ class PlanTripFragment : Fragment() {
         binding.startStopsRecycler.adapter = startAdapter
         binding.endStopsRecycler.layoutManager = LinearLayoutManager(context)
         binding.endStopsRecycler.adapter = endAdapter
-
-
-
-
     }
 
     private fun calculateAndDisplayMatchingRoutes() {

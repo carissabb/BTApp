@@ -177,13 +177,11 @@ class MainActivity : AppCompatActivity(){
     private fun fetchBusRoutes() {
         val call = RetrofitInstance.apiService.getCurrentRoutes()
 
-
         call.enqueue(object : Callback<List<CurrentRoutesResponse>> {
             override fun onResponse(
                 call: Call<List<CurrentRoutesResponse>>,
                 response: Response<List<CurrentRoutesResponse>>
             ) {
-                Log.d("Response", " Response: $response") // THIS NEEDS TO GET CORRECT RESPONSE
                 if (response.isSuccessful) {
                     val routeResponse = response.body()
                     routeResponse?.forEach { route ->
@@ -251,7 +249,6 @@ class MainActivity : AppCompatActivity(){
                 call: Call<List<ArrivalAndDepartureTimesForRoutesResponse>>,
                 response: Response<List<ArrivalAndDepartureTimesForRoutesResponse>>
             ) {
-                Log.d("Response", " Response: $response") // THIS NEEDS TO GET CORRECT RESPONSE
                 if (response.isSuccessful) {
                     val arrivalDepartureResponse = response.body()
                     val jsonMapper = ObjectMapper()
@@ -331,7 +328,6 @@ class MainActivity : AppCompatActivity(){
                 call: Call<List<ScheduledRoutesResponse>>,
                 response: Response<List<ScheduledRoutesResponse>>
             ) {
-                Log.d("Response", " Response: $response") // THIS NEEDS TO GET CORRECT RESPONSE
                 if (response.isSuccessful) {
                     val inputResponse = response.body()
                     val jsonMapper = ObjectMapper()

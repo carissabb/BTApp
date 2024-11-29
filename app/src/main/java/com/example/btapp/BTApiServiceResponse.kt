@@ -176,22 +176,22 @@ data class ArrivalAndDepartureTimesForRoutesResponse(
 // class to get scheduled routes form api
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class ScheduledRoutesResponse(
-    @JacksonXmlProperty(localName = "BlockID")
+    @JacksonXmlProperty(localName = "RouteName")
     val routeName: String? = null,
 
-    @JacksonXmlProperty(localName = "TripID")
+    @JacksonXmlProperty(localName = "RouteShortName")
     val routeShortName: String? = null,
 
-    @JacksonXmlProperty(localName = "StartTime")
+    @JacksonXmlProperty(localName = "RouteColor")
     val routeColor: String? = null,
 
-    @JacksonXmlProperty(localName = "PatternName") // this is where short name goes (ie TCP)
+    @JacksonXmlProperty(localName = "RouteTextColor")
     val routeTextColor: String? = null,
 
-    @JacksonXmlProperty(localName = "StopName")
+    @JacksonXmlProperty(localName = "RouteURL")
     val routeURL: String? = null,
 
-    @JacksonXmlProperty(localName = "RouteNotes")
+    @JacksonXmlProperty(localName = "ServiceLevel")
     val serviceLevel: String? = null
 
 ): Parcelable {
@@ -217,12 +217,12 @@ data class ScheduledRoutesResponse(
         return 0
     }
 
-    companion object CREATOR : Parcelable.Creator<ArrivalAndDepartureTimesForRoutesResponse> {
-        override fun createFromParcel(parcel: Parcel): ArrivalAndDepartureTimesForRoutesResponse {
-            return ArrivalAndDepartureTimesForRoutesResponse(parcel)
+    companion object CREATOR : Parcelable.Creator<ScheduledRoutesResponse> {
+        override fun createFromParcel(parcel: Parcel): ScheduledRoutesResponse {
+            return ScheduledRoutesResponse(parcel)
         }
 
-        override fun newArray(size: Int): Array<ArrivalAndDepartureTimesForRoutesResponse?> {
+        override fun newArray(size: Int): Array<ScheduledRoutesResponse?> {
             return arrayOfNulls(size)
         }
     }
