@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity(){
     var currentRoutesList: List<CurrentRoutesResponse>? = null
     var arrivalDepartureTimeList: List<ArrivalAndDepartureTimesForRoutesResponse>? = null
     var scheduledRouteList: List<ScheduledRoutesResponse>? = null
+    var scheduledRoutesMap = mutableMapOf<String, List<ScheduledRoutesResponse>>()
     private lateinit var routesViewModel: RoutesViewModel
     private lateinit var mapViewModel: MapViewModel
     private lateinit var planTripViewModel: PlanTripViewModel
@@ -86,17 +87,26 @@ class MainActivity : AppCompatActivity(){
         fetchBusData()
         routesViewModel.selectedRouteShortName.observe(this) { routeShortName ->
             routeShortName?.let {
-                Log.d("MainActivity", "route times updated: $it") // Add a log to verify
+                Log.d("MainActivity", "route times updated: $it")
                 fetchArrivalAndDepartureTimesForRoutes(it)
             }
         }
 
         planTripViewModel.selectedStopCode.observe(this) { stopCode ->
             stopCode?.let {
-                Log.d("MainActivity", "scheduled routes updated: $it") // Add a log to verify
+                Log.d("MainActivity", "scheduled routes updated: $it")
                 fetchScheduledRoutes(it)
             }
         }
+        /*
+        This section is supposed to handle the changes in the stopcode list fetch the related routes.
+        You'll see the corresponsing lines in PlanTripFragment
+         */
+//        planTripViewModel.selectedStopCode.observe(this) { stopCodes ->
+//            stopCodes?.split(",")?.forEach { stopCode ->
+//                fetchScheduledRoutes(stopCode.trim())
+//            }
+//        }
 
         planTripViewModel.onFetchNearestStops = { latitude, longitude, isStart ->
             fetchNearestStops(latitude, longitude, isStart)
@@ -171,6 +181,7 @@ class MainActivity : AppCompatActivity(){
                 call: Call<List<CurrentRoutesResponse>>,
                 response: Response<List<CurrentRoutesResponse>>
             ) {
+                Log.d("Response", " Response: $response") // THIS NEEDS TO GET CORRECT RESPONSE
                 if (response.isSuccessful) {
                     val routeResponse = response.body()
                     val jsonMapper = ObjectMapper()
@@ -211,6 +222,7 @@ class MainActivity : AppCompatActivity(){
                 call: Call<List<ArrivalAndDepartureTimesForRoutesResponse>>,
                 response: Response<List<ArrivalAndDepartureTimesForRoutesResponse>>
             ) {
+                Log.d("Response", " Response: $response") // THIS NEEDS TO GET CORRECT RESPONSE
                 if (response.isSuccessful) {
                     val arrivalDepartureResponse = response.body()
                     val jsonMapper = ObjectMapper()
@@ -279,8 +291,10 @@ class MainActivity : AppCompatActivity(){
     private fun fetchScheduledRoutes(stopCode: String) {
         // Define the parameters for the request
         val serviceDate: LocalDate = LocalDate.now() // get today's date
+        val trimmedStopCode = stopCode.substringAfterLast("#").substringBefore(")").trim()
+
         val call = RetrofitInstance.apiService.getScheduledRoutes(
-            stopCode,
+            trimmedStopCode,
             serviceDate.toString()
         )
         call.enqueue(object : Callback<List<ScheduledRoutesResponse>> {
@@ -303,6 +317,7 @@ class MainActivity : AppCompatActivity(){
                                 TypeReference<List<ScheduledRoutesResponse>>() {})
                     Log.d("FetchedScheduledRoutes", "JSON Response object: $jsonString")
 
+                    scheduledRoutesMap[stopCode] = scheduledRoutesList
                     scheduledRouteList = scheduledRoutesList
                     planTripViewModel.setScheduledRoutesList(scheduledRoutesList) // Update ViewModel with data
                 } else {

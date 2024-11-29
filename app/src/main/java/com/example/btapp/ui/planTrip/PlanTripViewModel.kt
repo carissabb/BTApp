@@ -5,7 +5,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.btapp.ArrivalAndDepartureTimesForRoutesResponse
 import com.example.btapp.NearestStopsResponse
+import com.example.btapp.RetrofitInstance
 import com.example.btapp.ScheduledRoutesResponse
+import okhttp3.Callback
+import retrofit2.Call
+import retrofit2.Response
+import java.time.LocalDate
 
 class PlanTripViewModel : ViewModel() {
 
@@ -30,10 +35,18 @@ class PlanTripViewModel : ViewModel() {
         _endDestinationNearestStopsList.value = endDestinationNearestStopsResponse
     }
 
+    private val _scheduledRoutesMap = MutableLiveData<Map<String, List<ScheduledRoutesResponse>>>()
+    val scheduledRoutesMap: LiveData<Map<String, List<ScheduledRoutesResponse>>> get() = _scheduledRoutesMap
+
+    fun setScheduledRoutesMap(routesMap: Map<String, List<ScheduledRoutesResponse>>) {
+        _scheduledRoutesMap.value = routesMap
+    }
+
+
     // for get scheduled routes
     val selectedStopCode = MutableLiveData<String>()
     private val _scheduledRouteList = MutableLiveData<List<ScheduledRoutesResponse>>()
-    val scheduledRoutesList: LiveData<List<ScheduledRoutesResponse>> = _scheduledRouteList
+    val scheduledRoutesList: LiveData<List<ScheduledRoutesResponse>> get()= _scheduledRouteList
 
     fun setScheduledRoutesList(scheduledRoutes: List<ScheduledRoutesResponse>) {
         _scheduledRouteList.value = scheduledRoutes
