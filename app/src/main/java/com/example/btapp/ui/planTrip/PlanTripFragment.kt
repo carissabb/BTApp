@@ -75,6 +75,10 @@ class PlanTripFragment : Fragment() {
         val startAdapter = NearestStopsAdapter(mutableListOf())
         val endAdapter = NearestStopsAdapter(mutableListOf())
 
+        routesAdapter = RoutesAdapter(mutableListOf())
+        binding.matchingRoutesRecycler.layoutManager = LinearLayoutManager(context)
+        binding.matchingRoutesRecycler.adapter = routesAdapter
+
         /**
          * So right now I have it so that each time 5 stops are taken, fetchScheduled route is called for each one.
          * Go to fetchScheduledRoutes below for more context
@@ -87,11 +91,8 @@ class PlanTripFragment : Fragment() {
                 stop.stopName?.let { "${it} (#${stop.stopCode})" }
             }
             startAdapter.updateStops(stopNames)
+            calculateAndDisplayMatchingRoutes()
 
-            stopNames.forEach { stopCode ->
-                fetchScheduledRoutes(stopCode)
-            }
-            //planTripViewModel.selectedStopCode.value = stopNames.joinToString(",")
         }
 
         planTripViewModel.endDestinationNearestStopsList.observe(viewLifecycleOwner) { nearestStops ->
@@ -101,11 +102,7 @@ class PlanTripFragment : Fragment() {
                 stop.stopName?.let { "${it} (#${stop.stopCode})" }
             }
             endAdapter.updateStops(stopNames)
-
-            stopNames.forEach { stopCode ->
-                fetchScheduledRoutes(stopCode)
-            }
-//            planTripViewModel.selectedStopCode.value = stopNames.joinToString(",")
+            calculateAndDisplayMatchingRoutes()
 
         }
 
@@ -115,88 +112,36 @@ class PlanTripFragment : Fragment() {
         binding.endStopsRecycler.layoutManager = LinearLayoutManager(context)
         binding.endStopsRecycler.adapter = endAdapter
 
-        routesAdapter = RoutesAdapter(mutableListOf())
-        binding.matchingRoutesRecycler.layoutManager = LinearLayoutManager(context)
-        binding.matchingRoutesRecycler.adapter = routesAdapter
 
 
-        //Not sure if this section works yet, theoretically should send the matching routes to the user.
-        planTripViewModel.scheduledRoutesList.observe(viewLifecycleOwner){
-            routesMap ->
-            val startStopCodes = planTripViewModel.startDestinationNearestStopsList.value?.mapNotNull { it.stopCode } ?: emptyList()
-            val endStopCodes = planTripViewModel.endDestinationNearestStopsList.value?.mapNotNull { it.stopCode } ?: emptyList()
-
-            val matchingRoutes = findMatchingRoutes(startStopCodes, endStopCodes, routesMap)
-            routesAdapter.updateRoutes(matchingRoutes)
-        }
 
     }
 
-    /**
-     * Almost identical to the method in Main, just that this one updates a Map which should store the routes related to each stopcode that is put in the map.
-     * Just got an idea- if this approach turns out to be a dead end, we could fetch the routes for every single stop on App launch (loop through each route, populate map with each new stop seen),
-     * this might make more sense anyways because we wouldn't need to make API calls in the middle of the route finding algorithm.
-     * The issue with the method below is that the response object gets a response in the correct format, but just with null values, check logcat
-     */
-    private fun fetchScheduledRoutes(stopCode: String) {
-        // Define the parameters for the request
-        val serviceDate: LocalDate = LocalDate.now() // get today's date
+    private fun calculateAndDisplayMatchingRoutes() {
+        val startStopCodes = planTripViewModel.startDestinationNearestStopsList.value?.mapNotNull { it.stopCode } ?: emptyList()
+        val endStopCodes = planTripViewModel.endDestinationNearestStopsList.value?.mapNotNull { it.stopCode } ?: emptyList()
+        val stopToRoutesMap = planTripViewModel.stopToRoute.value ?: emptyMap()
 
-        val trimmedStopCode = stopCode.substringAfterLast("#").substringBefore(")").trim()
-
-        val call = RetrofitInstance.apiService.getScheduledRoutes(
-            trimmedStopCode,
-            serviceDate.toString()
-        )
-        call.enqueue(object : Callback<List<ScheduledRoutesResponse>> {
-            override fun onResponse(
-                call: Call<List<ScheduledRoutesResponse>>,
-                response: Response<List<ScheduledRoutesResponse>>
-            ) {
-                Log.d("Response", " Response: $response") // THIS NEEDS TO GET CORRECT RESPONSE
-                if (response.isSuccessful) {
-                    val inputResponse = response.body()
-                    val jsonMapper = ObjectMapper()
-                    val jsonString = jsonMapper.writeValueAsString(inputResponse)
-                    Log.d("FetchScheduledRoutes", "JSON Response: $jsonString")
-
-                    // convert to object
-                    val scheduledRoutesList: List<ScheduledRoutesResponse> =
-                        jsonMapper.readValue(
-                            jsonString,
-                            object :
-                                TypeReference<List<ScheduledRoutesResponse>>() {})
-                    Log.d("FetchedScheduledRoutes", "JSON Response object: $jsonString")
-
-//                  scheduledRouteList = scheduledRoutesList
-                    scheduledRoutesMap[stopCode] = scheduledRoutesList
-                    planTripViewModel.setScheduledRoutesList(scheduledRoutesList) // Update ViewModel with data
-                } else {
-                    Log.e("FetchedScheduledRoutes", "Error: ${response.code()} - ${response.message()}")
-                }
-            }
-            override fun onFailure(
-                call: Call<List<ScheduledRoutesResponse>>,
-                t: Throwable
-            ) {
-                Log.e("FetchedScheduledRoutes", "Failed to fetch scheduled routes: ${t.message}")
-            }
-        })
+        val matchingRoutes = findMatchingRoutes(startStopCodes, endStopCodes, stopToRoutesMap)
+        Log.d("DisplayMatchingRoutes", matchingRoutes.toString())
+        routesAdapter.updateRoutes(matchingRoutes)
     }
 
     private fun findMatchingRoutes(
         startStopCodes: List<Int>,
         endStopCodes: List<Int>,
-        routesMap: List<ScheduledRoutesResponse>
+        stopToRoutesMap: Map<String, List<ScheduledRoutesResponse>>
     ): List<ScheduledRoutesResponse> {
         val startRoutes = startStopCodes.flatMap { stopCode ->
-            scheduledRoutesMap[stopCode.toString()] ?: emptyList()
+            stopToRoutesMap[stopCode.toString()] ?: emptyList()
         }
+
         val endRoutes = endStopCodes.flatMap { stopCode ->
-            scheduledRoutesMap[stopCode.toString()] ?: emptyList()
+            stopToRoutesMap[stopCode.toString()] ?: emptyList()
         }
+
         return startRoutes.filter { startRoute ->
-            endRoutes.any { it.routeShortName == startRoute.routeShortName }
+            endRoutes.any { endRoute -> startRoute.routeShortName == endRoute.routeShortName }
         }
     }
 

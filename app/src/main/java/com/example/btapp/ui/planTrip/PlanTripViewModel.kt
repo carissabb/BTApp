@@ -35,11 +35,11 @@ class PlanTripViewModel : ViewModel() {
         _endDestinationNearestStopsList.value = endDestinationNearestStopsResponse
     }
 
-    private val _scheduledRoutesMap = MutableLiveData<Map<String, List<ScheduledRoutesResponse>>>()
-    val scheduledRoutesMap: LiveData<Map<String, List<ScheduledRoutesResponse>>> get() = _scheduledRoutesMap
+    private val _stopToRoute = MutableLiveData<Map<String, List<ScheduledRoutesResponse>>>()
+    val stopToRoute: LiveData<Map<String, List<ScheduledRoutesResponse>>> get() = _stopToRoute
 
-    fun setScheduledRoutesMap(routesMap: Map<String, List<ScheduledRoutesResponse>>) {
-        _scheduledRoutesMap.value = routesMap
+    fun setStopToRoutesMap(map: Map<String, List<ScheduledRoutesResponse>>) {
+        _stopToRoute.postValue(map)
     }
 
 

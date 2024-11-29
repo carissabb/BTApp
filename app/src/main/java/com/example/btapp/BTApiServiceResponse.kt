@@ -7,6 +7,37 @@ import android.os.Parcelable
 
 @JsonIgnoreProperties(ignoreUnknown = true) // to ignore the encapsulation (ie <CurrentRoutes>)
 
+data class ScheduledStopCodesResponse(
+    @JacksonXmlProperty(localName = "StopCode")
+    val stopCode: String? = null,
+
+    @JacksonXmlProperty(localName = "StopName")
+    val stopName: String? = null
+): Parcelable {
+    constructor(parcel: Parcel) : this (
+        parcel.readString(),
+        parcel.readString()
+    )
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(stopCode)
+        parcel.writeString(stopName)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<ScheduledStopCodesResponse> {
+        override fun createFromParcel(parcel: Parcel): ScheduledStopCodesResponse {
+            return ScheduledStopCodesResponse(parcel)
+        }
+
+        override fun newArray(size: Int): Array<ScheduledStopCodesResponse?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
 // class to get current route data
 data class CurrentRoutesResponse(
     @JacksonXmlProperty(localName = "RouteName")
@@ -22,14 +53,19 @@ data class CurrentRoutesResponse(
     val routeTextColor: String? = null,
 
     @JacksonXmlProperty(localName = "RealTimeInfoAvail")
-    val realTimeInfoAvail: Boolean? = null
+    val realTimeInfoAvail: Boolean? = null,
+
+    @JacksonXmlProperty(localName = "Stability")
+    val stability: String? = null
+
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString(),
         parcel.readString(),
         parcel.readString(),
         parcel.readString(),
-        parcel.readValue(Boolean::class.java.classLoader) as? Boolean
+        parcel.readValue(Boolean::class.java.classLoader) as? Boolean,
+        parcel.readString()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -38,6 +74,7 @@ data class CurrentRoutesResponse(
         parcel.writeString(routeColor)
         parcel.writeString(routeTextColor)
         parcel.writeValue(realTimeInfoAvail)
+        parcel.writeString(stability)
     }
 
     override fun describeContents(): Int {

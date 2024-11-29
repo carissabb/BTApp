@@ -43,12 +43,12 @@ class MainActivity : AppCompatActivity(){
     var currentRoutesList: List<CurrentRoutesResponse>? = null
     var arrivalDepartureTimeList: List<ArrivalAndDepartureTimesForRoutesResponse>? = null
     var scheduledRouteList: List<ScheduledRoutesResponse>? = null
-    var scheduledRoutesMap = mutableMapOf<String, List<ScheduledRoutesResponse>>()
     private lateinit var routesViewModel: RoutesViewModel
     private lateinit var mapViewModel: MapViewModel
     private lateinit var planTripViewModel: PlanTripViewModel
     private val channelId = "BTAppChannel"
     private val notificationId = 1;
+    var stopToRoute = mutableMapOf<String, List<ScheduledRoutesResponse>>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -176,6 +176,8 @@ class MainActivity : AppCompatActivity(){
     // do we want to put these in BTApiServiceFetch ??
     private fun fetchBusRoutes() {
         val call = RetrofitInstance.apiService.getCurrentRoutes()
+
+
         call.enqueue(object : Callback<List<CurrentRoutesResponse>> {
             override fun onResponse(
                 call: Call<List<CurrentRoutesResponse>>,
@@ -184,6 +186,9 @@ class MainActivity : AppCompatActivity(){
                 Log.d("Response", " Response: $response") // THIS NEEDS TO GET CORRECT RESPONSE
                 if (response.isSuccessful) {
                     val routeResponse = response.body()
+                    routeResponse?.forEach { route ->
+                        fetchStops(route, stopToRoute)
+                    }
                     val jsonMapper = ObjectMapper()
                     val jsonString = jsonMapper.writeValueAsString(routeResponse)
                     Log.d("FetchedRoutes", "JSON Response: $jsonString")
@@ -206,7 +211,31 @@ class MainActivity : AppCompatActivity(){
         })
     }
 
-    // add rest of fetch functions here
+    private fun fetchStops(route: CurrentRoutesResponse, stopToRoute: MutableMap<String, List<ScheduledRoutesResponse>>){
+        val call = route.routeShortName?.let { RetrofitInstance.apiService.getScheduledStopCodes(it) }
+        call?.enqueue(object : Callback<List<ScheduledStopCodesResponse>> {
+            override fun onResponse(
+                call: Call<List<ScheduledStopCodesResponse>>,
+                response: Response<List<ScheduledStopCodesResponse>>
+            ) {
+                if (response.isSuccessful) {
+                    val stopCodes = response.body() ?: emptyList()
+
+                    stopCodes.forEach { stopCode ->
+                        stopCode.stopCode?.let { fetchScheduledRoutes(it) }
+                    }
+                    planTripViewModel.setStopToRoutesMap(stopToRoute)
+                } else {
+                    Log.e("MainActivity", "Failed to fetch stops for ${route.routeShortName}: ${response.code()} - ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<List<ScheduledStopCodesResponse>>, t: Throwable) {
+                Log.e("MainActivity", "Error fetching stops for ${route.routeShortName}: ${t.message}")
+            }
+        })
+    }
+
     private fun fetchArrivalAndDepartureTimesForRoutes(routeShortName: String) {
         // Define the parameters for the request
         val noOfTrips = "100" // Example value, adjust as needed
@@ -317,7 +346,7 @@ class MainActivity : AppCompatActivity(){
                                 TypeReference<List<ScheduledRoutesResponse>>() {})
                     Log.d("FetchedScheduledRoutes", "JSON Response object: $jsonString")
 
-                    scheduledRoutesMap[stopCode] = scheduledRoutesList
+                    stopToRoute[stopCode] = scheduledRoutesList
                     scheduledRouteList = scheduledRoutesList
                     planTripViewModel.setScheduledRoutesList(scheduledRoutesList) // Update ViewModel with data
                 } else {

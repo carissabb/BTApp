@@ -14,7 +14,7 @@ class RouteAdapter(
 ) : RecyclerView.Adapter<RouteAdapter.RouteViewHolder>() {
 
     inner class RouteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val routeNameTextView: TextView = itemView.findViewById(R.id.routesNameTextView)
+        private val routeNameTextView: TextView = itemView.findViewById(R.id.route_name_text)
 
         // get route short names and append color
         fun bind(route: CurrentRoutesResponse) {
