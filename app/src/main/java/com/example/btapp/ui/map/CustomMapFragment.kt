@@ -96,6 +96,14 @@ class CustomMapFragment : Fragment() {
                 routesViewModel
             )
         }
+
+//        // Fetch Data
+//        suspend fun fetchTrafficFlow() {
+//            val response = trafficApiService.getFlowData(mapOptions.toString(), "37.2249991,-80.4249983") // need to iterate bus stops
+//            val data = response.flowSegmentData
+//            Log.d("TrafficFlow", "Speed: ${data.currentSpeed}, Confidence: ${data.confidence}")
+//        }
+
     }
 
     // Helper method to get the route color from RoutesViewModel
@@ -126,6 +134,7 @@ class CustomMapFragment : Fragment() {
                 tilt = 45.0,
             )
         tomTomMap.moveCamera(cameraOptions)
+
     }
 
     private var selectedMarker: Marker? = null // Declare the selectedMarker variable

@@ -16,26 +16,24 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.example.btapp.databinding.ActivityMainBinding
 import com.example.btapp.ui.map.MapViewModel
 import com.example.btapp.ui.planTrip.PlanTripViewModel
-import com.example.btapp.ui.routes.RouteDetailFragment
-//import com.example.btapp.ui.routes.RouteDetailViewModel
 import com.example.btapp.ui.routes.RoutesViewModel
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.tomtom.sdk.map.display.MapOptions
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
-import java.util.Date
-import java.util.Locale
-import kotlin.time.Duration
+
 
 class MainActivity : AppCompatActivity(){
     // declare variables
@@ -112,7 +110,24 @@ class MainActivity : AppCompatActivity(){
             fetchNearestStops(latitude, longitude, isStart)
         }
 
-
+        // Call the fetchTrafficFlow function
+        lifecycleScope.launch {
+            try {
+                fetchTrafficFlow()
+            } catch (e: Exception) {
+                // Handle exceptions
+                Log.e("TrafficFlowError", "Error fetching traffic flow: ${e.message}")
+            }
+        }
+        // Call the fetchTrafficIncidents function
+        lifecycleScope.launch {
+            try {
+                fetchTrafficIncidents()
+            } catch (e: Exception) {
+                // Handle exceptions
+                Log.e("TrafficIncidentError", "Error fetching traffic incidents: ${e.message}")
+            }
+        }
     }
 
     private fun createNotificationChannel() {
@@ -145,7 +160,7 @@ class MainActivity : AppCompatActivity(){
         }, delayInMillis)
     }
 
-
+    // last call notification function
     @SuppressLint("MissingPermission")
     private fun showNotification(routeName: String) {
         // Create an intent for an activity in your app
@@ -172,8 +187,111 @@ class MainActivity : AppCompatActivity(){
         }
     }
 
-    // fetch functions here
-    // do we want to put these in BTApiServiceFetch ??
+    // traffic flow delay notification
+    @SuppressLint("MissingPermission")
+    private fun showTrafficSlowdownNotification(currentSpeed: Double, freeFlowSpeed: Double) {
+        // this needs to say the name of the routeShortName
+        // need to iterate through the stop lat/long to get slowdown data
+        // then determine what route the slowdown is on and output it here
+        val notificationContent = "Slowdown on routeShortName! Current Speed: $currentSpeed km/h, Free Flow Speed: $freeFlowSpeed km/h"
+
+        val intent = Intent(this, AlertDetails::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Build the notification
+        val builder = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_traffic)
+            .setContentTitle("Traffic Slowdown Alert")
+            .setContentText(notificationContent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+
+        // Show the notification
+        with(NotificationManagerCompat.from(this)) {
+            notify(notificationId, builder.build())
+        }
+    }
+
+    // traffic incident notification
+    @SuppressLint("MissingPermission")
+    private fun showTrafficIncidentNotification(incident: IncidentDetails) {
+        // Customize this notification based on incident details
+        val notificationContent = """
+            Incident ID: ${incident.properties.iconCategory}
+        """
+
+        val intent = Intent(this, AlertDetails::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Build the notification
+        val builder = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_incident)
+            .setContentTitle("Traffic Incident Alert")
+            .setContentText(notificationContent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+
+        // Show the notification
+        with(NotificationManagerCompat.from(this)) {
+            notify(notificationId, builder.build())
+        }
+    }
+
+// TOM TOM API FETCH FUNCTIONS
+    // fetch traffic flow data
+    // this function gets the traffic flow at each stop(lat/long) and alerts if the traffic is going more than 10 under the limit
+    private suspend fun fetchTrafficFlow() {
+        val mapOptions = MapOptions(mapKey = BuildConfig.TOMTOM_API_KEY)
+        val response = api.getFlowData(mapOptions.mapKey, "37.2249991,-80.4249983") // need to loop through route stop lat/longs
+        val data = response.flowSegmentData
+        Log.d("TrafficFlow", "Speed: ${data.currentSpeed}, Confidence: ${data.confidence}," +
+                " freeFlowSpeed:${data.freeFlowSpeed}, freeFlowTravelTime: ${data.freeFlowTravelTime}, " +
+                "currentTravelTime: ${data.currentTravelTime}")
+
+        // Slowdown Criteria (e.g., if speed is 10 or more below free-flow speed)
+        val slowdownThreshold = 10 // threshold in km/h (can be adjusted)
+        if (data.freeFlowSpeed - data.currentSpeed >= slowdownThreshold) {
+            // Trigger notification if there's a significant slowdown
+            showTrafficSlowdownNotification(data.currentSpeed, data.freeFlowSpeed)
+        }
+    }
+    // fetch traffic
+    private suspend fun fetchTrafficIncidents() {
+        try {
+            val bbox = "37.2249991,-80.4249983,37.2255000,-80.4235000"
+            val response = api.getIncidentData(BuildConfig.TOMTOM_API_KEY, bbox)
+
+            // Check if incidents exist
+            val incidents = response.incidentData ?: emptyList()
+            if (incidents.isEmpty()) {
+                Log.d("TrafficIncidents", "No traffic incidents found.")
+                return
+            }
+
+            // Process incidents
+            for (incident in incidents) {
+                Log.d("TrafficIncidents","Type: ${incident.properties.iconCategory}, Location: ${incident.geometry.coordinates}")
+                showTrafficIncidentNotification(incident) // call display incident notification function
+            }
+        } catch (e: Exception) {
+            Log.e("TrafficIncidentError", "Error fetching traffic incidents: ${e.message}")
+        }
+    }
+
+
+// BT API FETCH FUNCTIONS
     private fun fetchBusRoutes() {
         val call = RetrofitInstance.apiService.getCurrentRoutes()
 
