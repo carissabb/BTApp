@@ -13,15 +13,10 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.btapp.RetrofitInstance
 import com.example.btapp.ScheduledRoutesResponse
 import com.example.btapp.databinding.FragmentPlanTripBinding
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.time.LocalDate
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class PlanTripFragment : Fragment() {
     private lateinit var planTripViewModel: PlanTripViewModel
@@ -49,25 +44,26 @@ class PlanTripFragment : Fragment() {
         binding.submitTripButton.setOnClickListener {
             val startDestination = binding.startDestination.text.toString()
             val endDestination = binding.endDestination.text.toString()
+            val departureDate = binding.departureDatePicker.text.toString()
+            val departureTime = binding.departureTimePicker.text.toString()
 
-            if (startDestination.isNotEmpty()) {
-                geocoding(startDestination) { latitude, longitude ->
-                    planTripViewModel.fetchNearestStopsForDestination(
-                        latitude,
-                        longitude,
-                        true
-                    ) // true for start destination
-                }
-            }
+            val timestamp = convertToUnixTimestamp(departureDate, departureTime)
 
-            if (endDestination.isNotEmpty()) {
-                geocoding(endDestination) { latitude, longitude ->
-                    planTripViewModel.fetchNearestStopsForDestination(
-                        latitude,
-                        longitude,
-                        false
-                    ) // false for end destination
+            if (timestamp != null) {
+                if (startDestination.isNotEmpty()) {
+                    geocoding(startDestination) { latitude, longitude ->
+                        planTripViewModel.fetchWeather(latitude, longitude, timestamp)
+                        planTripViewModel.fetchNearestStopsForDestination(latitude, longitude, true)
+                    }
                 }
+
+                if (endDestination.isNotEmpty()) {
+                    geocoding(endDestination) { latitude, longitude ->
+                        planTripViewModel.fetchNearestStopsForDestination(latitude, longitude, false)
+                    }
+                }
+            } else {
+                Log.e("PlanTripFragment", "Invalid date or time format.")
             }
         }
 
@@ -140,6 +136,17 @@ class PlanTripFragment : Fragment() {
         }
     }
 
+
+    private fun convertToUnixTimestamp(date: String, time: String): Long? {
+        return try {
+            val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+            val parsedDate = formatter.parse("$date $time")
+            parsedDate?.time?.div(1000) // Convert milliseconds to seconds
+        } catch (e: Exception) {
+            Log.e("PlanTripFragment", "Error parsing date/time: ${e.message}")
+            null
+        }
+    }
 
     // get location lat / long
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)

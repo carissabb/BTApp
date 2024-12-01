@@ -30,4 +30,6 @@
     <string name="start_nearest_stops">Start Nearest Stops</string>
     <string name="end_nearest_stops">End Nearest Stops</string>
     <string name="matching_routes">Matching Routes</string>
+    <string name="weather_info_placeholder" />
+    <string name="departure_date">Departure Date</string>
 </resources>

@@ -7,6 +7,7 @@ import com.example.btapp.ArrivalAndDepartureTimesForRoutesResponse
 import com.example.btapp.NearestStopsResponse
 import com.example.btapp.RetrofitInstance
 import com.example.btapp.ScheduledRoutesResponse
+import com.example.btapp.WeatherResponse
 import okhttp3.Callback
 import retrofit2.Call
 import retrofit2.Response
@@ -19,6 +20,12 @@ class PlanTripViewModel : ViewModel() {
     fun fetchNearestStopsForDestination(latitude: Double, longitude: Double, isStart: Boolean) {
         // Call the callback in MainActivity to trigger fetching nearest stops
         onFetchNearestStops?.invoke(latitude, longitude, isStart)
+    }
+
+    var onFetchWeatherData: ((Double, Double, Long) -> Unit)? = null
+
+    fun fetchWeather(latitude: Double, longitude: Double, timestamp: Long) {
+        onFetchWeatherData?.invoke(latitude, longitude, timestamp)
     }
 
     private val _startDestinationNearestStopsList = MutableLiveData<List<NearestStopsResponse>>()

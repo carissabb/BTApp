@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -30,9 +31,11 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 
 class MainActivity : AppCompatActivity(){
@@ -47,6 +50,37 @@ class MainActivity : AppCompatActivity(){
     private val channelId = "BTAppChannel"
     private val notificationId = 1;
     var stopToRoute = mutableMapOf<String, List<ScheduledRoutesResponse>>()
+
+    var weatherCodeReasons = hashMapOf(
+        /*0 to "Clear sky detected",
+        1 to "Mainly clear sky detected",
+        2 to "Partly cloudy sky detected",
+        3 to "Overcast sky detected",*/
+        45 to "Fog detected",
+        48 to "Depositing rime fog detected",
+        51 to "Light drizzle detected",
+        53 to "Moderate drizzle detected",
+        55 to "Dense drizzle detected",
+        56 to "Light freezing drizzle detected",
+        57 to "Dense freezing drizzle detected",
+        61 to "Slight rain detected",
+        63 to "Moderate rain detected",
+        65 to "Heavy rain detected",
+        66 to "Light freezing rain detected",
+        67 to "Heavy freezing rain detected",
+        71 to "Slight snowfall detected",
+        73 to "Moderate snowfall detected",
+        75 to "Heavy snowfall detected",
+        77 to "Snow grains detected",
+        80 to "Slight rain showers detected",
+        81 to "Moderate rain showers detected",
+        82 to "Violent rain showers detected",
+        85 to "Slight snow showers detected",
+        86 to "Heavy snow showers detected",
+        95 to "Thunderstorm detected",
+        96 to "Thunderstorm with slight hail detected",
+        99 to "Thunderstorm with heavy hail detected"
+    )
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -108,6 +142,10 @@ class MainActivity : AppCompatActivity(){
 
         planTripViewModel.onFetchNearestStops = { latitude, longitude, isStart ->
             fetchNearestStops(latitude, longitude, isStart)
+        }
+
+        planTripViewModel.onFetchWeatherData = { latitude, longitude, timestamp ->
+            fetchWeatherData(latitude, longitude, timestamp)
         }
 
         // Call the fetchTrafficFlow function
@@ -237,6 +275,33 @@ class MainActivity : AppCompatActivity(){
         val builder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_incident)
             .setContentTitle("Traffic Incident Alert")
+            .setContentText(notificationContent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+
+        // Show the notification
+        with(NotificationManagerCompat.from(this)) {
+            notify(notificationId, builder.build())
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun showWeatherNotification(delayReason: String) {
+        val notificationContent = "Delay expected due to weather: $delayReason"
+
+        val intent = Intent(this, AlertDetails::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Build the notification
+        val builder = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_weather)
+            .setContentTitle("Weather Alert")
             .setContentText(notificationContent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
@@ -536,7 +601,7 @@ class MainActivity : AppCompatActivity(){
         })
     }
 
-    private fun fetchAllPlaces() {
+    /*private fun fetchAllPlaces() {
         val call = RetrofitInstance.apiService.getAllPlaces()
         call.enqueue(object : Callback<List<AllPlacesResponse>> {
             override fun onResponse(call: Call<List<AllPlacesResponse>>, response: Response<List<AllPlacesResponse>>) {
@@ -553,5 +618,115 @@ class MainActivity : AppCompatActivity(){
                 Log.e("MainActivity", "Failed to fetch places: ${t.message}")
             }
         })
+    }*/
+
+
+    private fun fetchWeatherData(latitude: Double, longitude: Double, timestamp: Long) {
+        val dateTime = SimpleDateFormat("yyyy-MM-dd'T'HH:00", Locale.getDefault()).format(timestamp * 1000)
+
+        val call = RetrofitInstance.weatherApiService.getWeatherForecast(
+            latitude,
+            longitude,
+            start = dateTime,
+            end = dateTime
+        )
+
+        call.enqueue(object : Callback<WeatherResponse> {
+            override fun onResponse(
+                call: Call<WeatherResponse>,
+                response: Response<WeatherResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val weatherResponse = response.body()
+
+                    weatherResponse?.hourly?.let { hourly ->
+                        val closestIndex = getClosestHourIndex(hourly.time, timestamp)
+                        if (closestIndex != -1) {
+                            val temperatureFahrenheit =
+                                convertCelsiusToFahrenheit(hourly.temperature_2m[closestIndex])
+                            val precipitationInches = convertMmToInches(hourly.precipitation[closestIndex])
+                            val windSpeedMph = convertKmHToMph(hourly.windspeed_10m[closestIndex])
+                            val visibilityMeters = hourly.visibility[closestIndex]
+                            val visibilityMiles = convertMetersToMiles(visibilityMeters)
+                            val weatherCode = hourly.weathercode[closestIndex]
+                            //val humidity = hourly.relativehumidity_2m[closestIndex]
+                            //val snowfall = hourly.snowfall[closestIndex]
+                            //val cloudCover = hourly.cloudcover[closestIndex]
+
+                            val delayReason = getDelayReason(
+                                temperatureFahrenheit,
+                                precipitationInches,
+                                visibilityMiles,
+                                windSpeedMph,
+                                weatherCode
+                            )
+
+                            if (delayReason != null) {
+                                showWeatherNotification(delayReason)
+                            } else {
+
+                            }
+                        } else {
+                            Log.e(
+                                "MainActivity",
+                                "Error: ${response.code()} - ${response.message()}"
+                            )
+                        }
+                    }
+                }
+            }
+            override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
+                Log.e("MainActivity", "Failed to fetch weather info: ${t.message}")
+            }
+        })
+    }
+
+    private fun getDelayReason(
+        temperatureFahrenheit: Double,
+        precipitationInches: Double,
+        visibilityMiles: Double,
+        windSpeedMph: Double,
+        weatherCode: Int
+    ): String? {
+        val lowTemperatureThreshold = 32.0
+        val highWindSpeedThreshold = 19.0
+        val lowVisibilityThreshold = 1.0
+        val significantPrecipitationThreshold = 0.3
+
+        return when {
+            weatherCode in weatherCodeReasons -> weatherCodeReasons[weatherCode]
+            temperatureFahrenheit <= lowTemperatureThreshold -> "Low temperature detected"
+            precipitationInches >= significantPrecipitationThreshold -> "Heavy precipitation detected"
+            visibilityMiles <= lowVisibilityThreshold -> "Low visibility detected"
+            windSpeedMph >= highWindSpeedThreshold -> "High wind speed detected"
+            else -> null
+        }
+    }
+
+    private fun convertCelsiusToFahrenheit(celsius: Double): Double {
+        return (celsius * 9 / 5) + 32
+    }
+
+    private fun getClosestHourIndex(hourlyTimes: List<String>, targetTimestamp: Long): Int {
+        val targetDateTime = SimpleDateFormat("yyyy-MM-dd'T'HH:00", Locale.getDefault()).format(targetTimestamp * 1000)
+
+        hourlyTimes.forEachIndexed { index, time ->
+            if (time == targetDateTime) {
+                return index
+            }
+        }
+        return -1
+    }
+
+    private fun convertKmHToMph(kmh: Double): Double {
+        return kmh * 0.621371
+    }
+
+    private fun convertMmToInches(mm: Double): Double {
+        return mm * 0.0393701
+    }
+
+    private fun convertMetersToMiles(meters: Double): Double {
+        return meters * 0.000621371
     }
 }
