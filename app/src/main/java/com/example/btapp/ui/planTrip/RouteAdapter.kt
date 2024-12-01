@@ -6,9 +6,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.btapp.R
-import com.example.btapp.ScheduledRoutesResponse
 
-class RoutesAdapter(private val routes: MutableList<ScheduledRoutesResponse>) :
+class RoutesAdapter(private val routes: MutableList<String>) :
     RecyclerView.Adapter<RoutesAdapter.RouteViewHolder>() {
 
     class RouteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -23,12 +22,12 @@ class RoutesAdapter(private val routes: MutableList<ScheduledRoutesResponse>) :
 
     override fun onBindViewHolder(holder: RouteViewHolder, position: Int) {
         val route = routes[position]
-        holder.routeNameText.text = route.routeShortName
+        holder.routeNameText.text = route
     }
 
     override fun getItemCount(): Int = routes.size
 
-    fun updateRoutes(newRoutes: List<ScheduledRoutesResponse>) {
+    fun updateRoutes(newRoutes: List<String>) {
         routes.clear()
         routes.addAll(newRoutes)
         notifyDataSetChanged()

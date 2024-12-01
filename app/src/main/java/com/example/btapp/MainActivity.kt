@@ -50,6 +50,8 @@ class MainActivity : AppCompatActivity(){
     private val channelId = "BTAppChannel"
     private val notificationId = 1;
     var stopToRoute = mutableMapOf<String, List<ScheduledRoutesResponse>>()
+    var routeToStop = mutableMapOf<String, List<ScheduledStopCodesResponse>>()
+
 
     var weatherCodeReasons = hashMapOf(
         /*0 to "Clear sky detected",
@@ -401,11 +403,14 @@ class MainActivity : AppCompatActivity(){
             ) {
                 if (response.isSuccessful) {
                     val stopCodes = response.body() ?: emptyList()
-
+                    route.routeShortName.let { routeShortname ->
+                        routeToStop[routeShortname] = stopCodes
+                    }
                     stopCodes.forEach { stopCode ->
                         stopCode.stopCode?.let { fetchScheduledRoutes(it) }
                     }
                     planTripViewModel.setStopToRoutesMap(stopToRoute)
+                    planTripViewModel.setRouteToStopsMap(routeToStop)
                 } else {
                     Log.e("MainActivity", "Failed to fetch stops for ${route.routeShortName}: ${response.code()} - ${response.message()}")
                 }
@@ -568,7 +573,7 @@ class MainActivity : AppCompatActivity(){
 
     private fun fetchNearestStops(latitude: Double, longitude: Double, isStart: Boolean) {
         // Define the parameters for the request
-        val noOfStops = "5" // Example value, adjust as needed
+        val noOfStops = "2" // Example value, adjust as needed
         val serviceDate: LocalDate = LocalDate.now() // Example date
 
         val call = RetrofitInstance.apiService.getNearestStops(

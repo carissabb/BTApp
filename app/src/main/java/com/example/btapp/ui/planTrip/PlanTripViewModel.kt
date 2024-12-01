@@ -7,6 +7,7 @@ import com.example.btapp.ArrivalAndDepartureTimesForRoutesResponse
 import com.example.btapp.NearestStopsResponse
 import com.example.btapp.RetrofitInstance
 import com.example.btapp.ScheduledRoutesResponse
+import com.example.btapp.ScheduledStopCodesResponse
 import com.example.btapp.WeatherResponse
 import okhttp3.Callback
 import retrofit2.Call
@@ -48,6 +49,15 @@ class PlanTripViewModel : ViewModel() {
     fun setStopToRoutesMap(map: Map<String, List<ScheduledRoutesResponse>>) {
         _stopToRoute.postValue(map)
     }
+
+    private val _routeToStop = MutableLiveData<Map<String, List<ScheduledStopCodesResponse
+            >>>()
+    val routeToStops: LiveData<Map<String, List<ScheduledStopCodesResponse>>> get() = _routeToStop
+
+    fun setRouteToStopsMap(routeToStop: Map<String, List<ScheduledStopCodesResponse>>) {
+        _routeToStop.value = routeToStop
+    }
+
 
 
     // for get scheduled routes

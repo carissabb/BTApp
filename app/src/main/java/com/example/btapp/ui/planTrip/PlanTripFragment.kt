@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.btapp.ScheduledRoutesResponse
+import com.example.btapp.ScheduledStopCodesResponse
 import com.example.btapp.databinding.FragmentPlanTripBinding
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -22,7 +23,6 @@ class PlanTripFragment : Fragment() {
     private lateinit var planTripViewModel: PlanTripViewModel
     private lateinit var binding: FragmentPlanTripBinding
     var scheduledRouteList: List<ScheduledRoutesResponse>? = null
-    private val scheduledRoutesMap = mutableMapOf<String, List<ScheduledRoutesResponse>>()
     private lateinit var routesAdapter: RoutesAdapter
 
 
@@ -44,8 +44,22 @@ class PlanTripFragment : Fragment() {
         binding.submitTripButton.setOnClickListener {
             val startDestination = binding.startDestination.text.toString()
             val endDestination = binding.endDestination.text.toString()
-            val departureDate = binding.departureDatePicker.text.toString()
-            val departureTime = binding.departureTimePicker.text.toString()
+            var departureDate = binding.departureDatePicker.text.toString().trim()
+            var departureTime = binding.departureTimePicker.text.toString()
+
+            if (departureDate.isEmpty()) {
+                val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(System.currentTimeMillis())
+                departureDate = currentDate.trim()
+                Log.d("PlanTripFragment", "Current Date: $departureDate")
+            }
+
+            if (departureTime.isEmpty()) {
+                val currentTime = System.currentTimeMillis()
+                val defaultTimeInMillis = currentTime + (15 * 60 * 1000) // Add 15 minutes
+                val defaultTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(defaultTimeInMillis)
+                departureTime = defaultTime
+            }
+
 
             val timestamp = convertToUnixTimestamp(departureDate, departureTime)
 
@@ -82,7 +96,7 @@ class PlanTripFragment : Fragment() {
          */
         planTripViewModel.startDestinationNearestStopsList.observe(viewLifecycleOwner) { nearestStops ->
             // Limit to 5 nearest stops
-            val limitedStops = nearestStops.take(5) // change for out many results you want
+            val limitedStops = nearestStops.take(2) // change for out many results you want
             val stopNames = limitedStops.mapNotNull { stop ->
                 stop.stopName?.let { "${it} (#${stop.stopCode})" }
             }
@@ -92,7 +106,7 @@ class PlanTripFragment : Fragment() {
 
         planTripViewModel.endDestinationNearestStopsList.observe(viewLifecycleOwner) { nearestStops ->
             // Limit to 5 nearest stops
-            val limitedStops = nearestStops.take(5) // change for out many results you want
+            val limitedStops = nearestStops.take(2) // change for out many results you want
             val stopNames = limitedStops.mapNotNull { stop ->
                 stop.stopName?.let { "${it} (#${stop.stopCode})" }
             }
@@ -112,8 +126,9 @@ class PlanTripFragment : Fragment() {
         val startStopCodes = planTripViewModel.startDestinationNearestStopsList.value?.mapNotNull { it.stopCode } ?: emptyList()
         val endStopCodes = planTripViewModel.endDestinationNearestStopsList.value?.mapNotNull { it.stopCode } ?: emptyList()
         val stopToRoutesMap = planTripViewModel.stopToRoute.value ?: emptyMap()
+        val routeToStopsMap = planTripViewModel.routeToStops.value ?: emptyMap()
 
-        val matchingRoutes = findMatchingRoutes(startStopCodes, endStopCodes, stopToRoutesMap)
+        val matchingRoutes = findMatchingRoutes(startStopCodes, endStopCodes, stopToRoutesMap, routeToStopsMap)
         Log.d("DisplayMatchingRoutes", matchingRoutes.toString())
         routesAdapter.updateRoutes(matchingRoutes)
     }
@@ -121,20 +136,60 @@ class PlanTripFragment : Fragment() {
     private fun findMatchingRoutes(
         startStopCodes: List<Int>,
         endStopCodes: List<Int>,
-        stopToRoutesMap: Map<String, List<ScheduledRoutesResponse>>
-    ): List<ScheduledRoutesResponse> {
+        stopToRoutesMap: Map<String, List<ScheduledRoutesResponse>>,
+        routeToStopsMap: Map<String, List<ScheduledStopCodesResponse>>
+    ): List<String> {
+        val directMatches = mutableListOf<String>()
+        val transferMatches = mutableListOf<String>()
+
+        val transitHubGroups = mapOf(
+            "Transit Hub" to setOf(8002, 8003, 8004, 8005, 8006, 8007, 8111, 8113, 8114, 8115, 8116)
+        )
+
+        fun areStopsInSameHub(stop1: Int, stop2: Int): Boolean {
+            val inSameHub = transitHubGroups.values.any { hub ->
+                val isStop1InHub = stop1 in hub
+                val isStop2InHub = stop2 in hub
+                isStop1InHub && isStop2InHub
+            }
+            return inSameHub
+        }
+
+
         val startRoutes = startStopCodes.flatMap { stopCode ->
             stopToRoutesMap[stopCode.toString()] ?: emptyList()
         }
-
         val endRoutes = endStopCodes.flatMap { stopCode ->
             stopToRoutesMap[stopCode.toString()] ?: emptyList()
         }
 
-        return startRoutes.filter { startRoute ->
-            endRoutes.any { endRoute -> startRoute.routeShortName == endRoute.routeShortName }
+        // Case 1: Direct routes
+        startRoutes.forEach { startRoute ->
+            if (endRoutes.any { it.routeShortName == startRoute.routeShortName }) {
+                directMatches.add(startRoute.routeShortName!!)
+            }
         }
+        // Case 2: Transfer routes
+        startRoutes.forEach { startRoute ->
+            val startStops = routeToStopsMap[startRoute.routeShortName!!]?.mapNotNull { it.stopCode } ?: emptyList()
+            endRoutes.forEach { endRoute ->
+                val endStops = routeToStopsMap[endRoute.routeShortName!!]?.mapNotNull { it.stopCode } ?: emptyList()
+
+                val transferStops = startStops.filter { startStop ->
+                    endStops.any { endStop ->
+                        //Log.d("TransferCheck", "StartStop: $startStop, EndStop: $endStop, Match: ${startStop == endStop}, SameHub: ${areStopsInSameHub(startStop.toInt(), endStop.toInt())}")
+                        startStop == endStop || areStopsInSameHub(startStop.toInt(), endStop.toInt())
+                    }
+                }
+
+                if (transferStops.isNotEmpty()) {
+                    transferMatches.add("${startRoute.routeShortName} -> ${endRoute.routeShortName} (Transfer at ${transferStops.first()})")
+                }
+            }
+        }
+        return directMatches + transferMatches
     }
+
 
 
     private fun convertToUnixTimestamp(date: String, time: String): Long? {
