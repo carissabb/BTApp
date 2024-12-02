@@ -170,6 +170,8 @@ class MainActivity : AppCompatActivity(){
         }
     }
 
+
+
     private fun createNotificationChannel() {
         val name = "BTApp Notifications"
         val descriptionText = "Channel for BTApp notifications"
@@ -376,7 +378,6 @@ class MainActivity : AppCompatActivity(){
                     val jsonString = jsonMapper.writeValueAsString(routeResponse)
                     Log.d("FetchedRoutes", "JSON Response: $jsonString")
 
-                    // convert to object
                     val routesList: List<CurrentRoutesResponse> =
                         jsonMapper.readValue(
                             jsonString,

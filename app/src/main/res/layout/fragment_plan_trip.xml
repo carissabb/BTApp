@@ -67,7 +67,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/matching_routes_recycler"
             android:layout_width="match_parent"
-            android:layout_height="100dp" />
+            android:layout_height="80dp" />
 
         <TextView
             android:id="@+id/start_nearest_stops_label"

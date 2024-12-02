@@ -122,11 +122,25 @@ class PlanTripFragment : Fragment() {
         binding.endStopsRecycler.adapter = endAdapter
     }
 
+    private fun isWeekday(): Boolean {
+        val dayOfWeek = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_WEEK)
+        return dayOfWeek != java.util.Calendar.SATURDAY && dayOfWeek != java.util.Calendar.SUNDAY
+    }
+
     private fun calculateAndDisplayMatchingRoutes() {
         val startStopCodes = planTripViewModel.startDestinationNearestStopsList.value?.mapNotNull { it.stopCode } ?: emptyList()
         val endStopCodes = planTripViewModel.endDestinationNearestStopsList.value?.mapNotNull { it.stopCode } ?: emptyList()
-        val stopToRoutesMap = planTripViewModel.stopToRoute.value ?: emptyMap()
+
+        val originalStopToRoutesMap = planTripViewModel.stopToRoute.value ?: emptyMap()
         val routeToStopsMap = planTripViewModel.routeToStops.value ?: emptyMap()
+
+        val stopToRoutesMap = if (isWeekday()) {
+            originalStopToRoutesMap.mapValues { (_, routes) ->
+                routes.filter { it.routeShortName !in listOf("HWC", "NMP") }
+            }
+        } else {
+            originalStopToRoutesMap
+        }
 
         val matchingRoutes = findMatchingRoutes(startStopCodes, endStopCodes, stopToRoutesMap, routeToStopsMap)
         Log.d("DisplayMatchingRoutes", matchingRoutes.toString())
@@ -139,11 +153,11 @@ class PlanTripFragment : Fragment() {
         stopToRoutesMap: Map<String, List<ScheduledRoutesResponse>>,
         routeToStopsMap: Map<String, List<ScheduledStopCodesResponse>>
     ): List<String> {
-        val directMatches = mutableListOf<String>()
-        val transferMatches = mutableListOf<String>()
+        val directMatches = mutableSetOf<String>()
+        val transferMatches = mutableSetOf<String>()
 
         val transitHubGroups = mapOf(
-            "Transit Hub" to setOf(8002, 8003, 8004, 8005, 8006, 8007, 8111, 8113, 8114, 8115, 8116)
+            "Transit Hub" to setOf(8002, 8003, 8004, 8005, 8006, 8007, 8110, 8111, 8113, 8114, 8115, 8116)
         )
 
         fun areStopsInSameHub(stop1: Int, stop2: Int): Boolean {
@@ -174,7 +188,6 @@ class PlanTripFragment : Fragment() {
             val startStops = routeToStopsMap[startRoute.routeShortName!!]?.mapNotNull { it.stopCode } ?: emptyList()
             endRoutes.forEach { endRoute ->
                 val endStops = routeToStopsMap[endRoute.routeShortName!!]?.mapNotNull { it.stopCode } ?: emptyList()
-
                 val transferStops = startStops.filter { startStop ->
                     endStops.any { endStop ->
                         //Log.d("TransferCheck", "StartStop: $startStop, EndStop: $endStop, Match: ${startStop == endStop}, SameHub: ${areStopsInSameHub(startStop.toInt(), endStop.toInt())}")
@@ -183,11 +196,22 @@ class PlanTripFragment : Fragment() {
                 }
 
                 if (transferStops.isNotEmpty()) {
-                    transferMatches.add("${startRoute.routeShortName} -> ${endRoute.routeShortName} (Transfer at ${transferStops.first()})")
+                    val transferStop = transferStops.first()
+
+                    val nextOnboardingStop = endStops.firstOrNull { endStop ->
+                        areStopsInSameHub(transferStop.toInt(), endStop.toInt()) || transferStop == endStop
+                    }
+
+                    val transferMessage = if (nextOnboardingStop != null) {
+                        "${startRoute.routeShortName} -> ${endRoute.routeShortName} (Transfer at $transferStop, Next onboarding at $nextOnboardingStop)"
+                    } else {
+                        "${startRoute.routeShortName} -> ${endRoute.routeShortName} (Transfer at $transferStop)"
+                    }
+                    transferMatches.add(transferMessage)
                 }
             }
         }
-        return directMatches + transferMatches
+        return (directMatches + transferMatches).toList()
     }
 
 
