@@ -34,6 +34,8 @@ import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
@@ -422,6 +424,8 @@ class MainActivity : AppCompatActivity(){
         })
     }
 
+
+
     private fun fetchArrivalAndDepartureTimesForRoutes(routeShortName: String) {
         // Define the parameters for the request
         val noOfTrips = "100" // Example value, adjust as needed
@@ -452,6 +456,7 @@ class MainActivity : AppCompatActivity(){
 
                     arrivalDepartureTimeList = arrivalDepartureTimesList
                     routesViewModel.setArrivalDepartureTimesList(arrivalDepartureTimesList) // Update ViewModel with data
+                    planTripViewModel.setArrivalDepartureTimesList(arrivalDepartureTimesList)
 
                     var latestTime: LocalTime? = null
                     var routeName: String? = null
