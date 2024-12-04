@@ -32,7 +32,7 @@ class PlanTripFragment : Fragment() {
     private lateinit var binding: FragmentPlanTripBinding
     var scheduledRouteList: List<ScheduledRoutesResponse>? = null
     private lateinit var routesAdapter: RoutesAdapter
-
+    private var userSpecifiedTime: ZonedDateTime? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -68,6 +68,15 @@ class PlanTripFragment : Fragment() {
                 departureTime = defaultTime
             }
 
+            userSpecifiedTime = try {
+                val dateTimeString = "$departureDate $departureTime"
+                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(java.time.ZoneId.of("America/New_York"))
+                ZonedDateTime.parse("$dateTimeString EST", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z"))
+            } catch (e: Exception) {
+                Log.e("PlanTripFragment", "Invalid date/time format: ${e.message}")
+                null
+            }
+
 
             val timestamp = convertToUnixTimestamp(departureDate, departureTime)
 
@@ -100,7 +109,7 @@ class PlanTripFragment : Fragment() {
         /**
          * So right now I have it so that each time 5 stops are taken, fetchScheduled route is called for each one.
          * Go to fetchScheduledRoutes below for more context
-         * Commented line should ping the commented out observer in main.
+         * Commented line should ping the commented out observer in main
          */
         planTripViewModel.startDestinationNearestStopsList.observe(viewLifecycleOwner) { nearestStops ->
             // Limit to 5 nearest stops
@@ -141,7 +150,7 @@ class PlanTripFragment : Fragment() {
         callback: (String?) -> Unit // Returns the formatted earliest departure time or null
     ) {
         // Call the API for the given routeShortName
-        val noOfTrips = "30" // Example value, adjust as needed
+        val noOfTrips = "30"
         val serviceDate: LocalDate = LocalDate.now()
 
         val call = RetrofitInstance.apiService.getArrivalAndDepartureTimes(
@@ -164,7 +173,8 @@ class PlanTripFragment : Fragment() {
                             time.calculatedDepartureTime,
                             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
                         )
-                        departureTime.isAfter(currentTime)
+                        val userTime = userSpecifiedTime ?: ZonedDateTime.now()
+                        departureTime.isAfter(userTime)
                     }
 
                     val earliestTime = validTimes.minByOrNull { time ->
@@ -325,8 +335,8 @@ class PlanTripFragment : Fragment() {
                                         "End Stop: ${endStopName ?: "Unknown End Stop"} (#${endStopCode ?: "Unknown"})\n" +
                                         "Earliest Departure Time: ${earliestStartTime ?: "Unknown"}\n" +
                                         "Transfer Buses: Get off at ${transferStopName ?: "Unknown Stop"} (#${transferStopCode}), " +
-                                        "and walk to ${nextOnboardingStopName ?: "nearby stop"} (#${nextOnboardingStop})\n" +
-                                        "Earliest Transfer Departure Time: ${earliestTransferTime ?: "Unknown"}"
+                                        "and walk to ${nextOnboardingStopName ?: "nearby stop"} (#${nextOnboardingStop})\n"
+                                        //"Earliest Transfer Departure Time: ${earliestTransferTime ?: "Unknown"}"
                             } else {
                                 "$startRouteShortName ➜ $endRouteShortName\n" +
                                         "Start Stop: ${startStopName ?: "Unknown Start Stop"} (#${startStopCode ?: "Unknown"})\n" +
