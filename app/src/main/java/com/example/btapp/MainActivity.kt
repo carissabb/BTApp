@@ -52,7 +52,6 @@ class MainActivity : AppCompatActivity(){
     var stopToRoute = mutableMapOf<String, List<ScheduledRoutesResponse>>()
     var routeToStop = mutableMapOf<String, List<ScheduledStopCodesResponse>>()
 
-
     var weatherCodeReasons = hashMapOf(
         /*0 to "Clear sky detected",
         1 to "Mainly clear sky detected",

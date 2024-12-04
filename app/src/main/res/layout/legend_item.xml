@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:layout_margin="4dp"
+    android:background="@drawable/legend_item_background">
+
+    <!-- Circle for route color -->
+    <View
+        android:id="@+id/route_color_view"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/circle_shape" />
+
+    <!-- Text for route name -->
+    <TextView
+        android:id="@+id/route_name_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Route Name"
+        android:textColor="@android:color/black"
+        android:textSize="14sp" />
+</LinearLayout>

@@ -24,7 +24,7 @@ class ScheduledRouteAdapter(private val routeNames: List<String>) : RecyclerView
     inner class RouteViewHolder(private val binding: FragmentPlanTripBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(routeName: String) {
-            binding.routeNameText.text = routeName
+            //binding.routeNameText.text = routeName
         }
     }
 }
