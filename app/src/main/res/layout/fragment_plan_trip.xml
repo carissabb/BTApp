@@ -1,121 +1,152 @@
-<!-- Example of a simple UI layout in activity_plan_trip.xml -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="16dp">
-
-    <EditText
-        android:id="@+id/start_destination"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/enter_start_destination" />
-
-    <EditText
-        android:id="@+id/end_destination"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/enter_end_destination" />
-
-    <EditText
-        android:id="@+id/departure_date_picker"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/departure_date"/>
-
-    <EditText
-        android:id="@+id/departure_time_picker"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/departure_time"/>
-
-    <Button
-        android:id="@+id/submit_trip_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/plan_trip" />
-
-    <TextView
-        android:id="@+id/route_name_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Route Name"
-        android:textSize="16sp" />
-
-    <TextView
-        android:id="@+id/weather_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/weather_info_placeholder"
-        android:padding="8dp"
-        android:textSize="16sp"
-        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:spacing="16dp">
+
+        <!-- Start Destination -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/enter_start_destination">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/start_destination"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- End Destination -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/enter_end_destination">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/end_destination"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Departure Date -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/departure_date">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/departure_date_picker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Departure Time -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/departure_time">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/departure_time_picker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
-            android:id="@+id/matching_routes_label"
+            android:id="@+id/route_name_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/matching_routes"
-            android:textStyle="bold" />
+            android:text="@string/route_name"
+            android:textSize="16sp" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/matching_routes_recycler"
+        <!-- Submit Button -->
+        <Button
+            android:id="@+id/submit_trip_button"
             android:layout_width="match_parent"
-            android:layout_height="80dp" />
+            android:layout_height="wrap_content"
+            android:text="@string/plan_trip"
+            android:backgroundTint="@color/dusty_rose"
+            android:textColor="@android:color/white" />
 
+        <!-- Weather Info -->
+        <TextView
+            android:id="@+id/weather_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/weather_info_placeholder"
+            android:padding="8dp"
+            android:textSize="16sp"
+            android:visibility="gone"
+            android:background="@drawable/info_background" />
+
+        <!-- Matching Routes Section -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardElevation="4dp"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/matching_routes_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/matching_routes"
+                    android:textStyle="bold"
+                    android:textSize="18sp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/matching_routes_recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Start Nearest Stops -->
+        <!---
         <TextView
             android:id="@+id/start_nearest_stops_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/start_nearest_stops"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textSize="16sp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/start_stops_recycler"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+            -->
 
+        <!-- End Nearest Stops -->
+        <!--
         <TextView
             android:id="@+id/end_nearest_stops_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/end_nearest_stops"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textSize="16sp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/end_stops_recycler"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+            -->
     </LinearLayout>
-<!--    <TextView
-        android:id="@+id/start_nearest_stops_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/start_nearest_stops"
-        android:textStyle="bold"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/start_nearest_stops_recycler"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <TextView
-        android:id="@+id/end_nearest_stops_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/end_nearest_stops"
-        android:textStyle="bold"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/end_nearest_stops_recycler"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-        -->
-
-</LinearLayout>
+</ScrollView>

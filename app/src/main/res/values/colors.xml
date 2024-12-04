@@ -4,5 +4,18 @@
     <color name="maroon_500">#6A1B3A</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="light_grey">#E0E0E0</color>
     <color name="grey">#808080</color>
+    <color name="beige">#F6E4D2</color>
+    <color name="off_white">#F8F9FA</color>
+
+    <!-- Harmonious Neutral Colors -->
+    <color name="medium_grey">#B0BEC5</color>
+    <color name="taupe">#8B8589</color>
+    <color name="sandy_tan">#D2B48C</color>
+    <color name="charcoal_grey">#37474F</color>
+    <color name="muted_navy">#455A64</color>
+    <color name="soft_sage_green">#ABC3BB</color>
+    <color name="dusty_rose">#C8A195</color>
+    <color name="pale_gold">#E8D4A2</color>
 </resources>

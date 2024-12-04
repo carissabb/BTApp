@@ -116,10 +116,10 @@ class PlanTripFragment : Fragment() {
         }
 
         // Set the RecyclerView adapters after initializing the adapters
-        binding.startStopsRecycler.layoutManager = LinearLayoutManager(context)
-        binding.startStopsRecycler.adapter = startAdapter
-        binding.endStopsRecycler.layoutManager = LinearLayoutManager(context)
-        binding.endStopsRecycler.adapter = endAdapter
+        //.startStopsRecycler.layoutManager = LinearLayoutManager(context)
+        //binding.startStopsRecycler.adapter = startAdapter
+        //binding.endStopsRecycler.layoutManager = LinearLayoutManager(context)
+        //binding.endStopsRecycler.adapter = endAdapter
     }
 
     private fun isWeekday(): Boolean {
@@ -203,9 +203,9 @@ class PlanTripFragment : Fragment() {
                     }
 
                     val transferMessage = if (nextOnboardingStop != null) {
-                        "${startRoute.routeShortName} -> ${endRoute.routeShortName} (Transfer at $transferStop, Next onboarding at $nextOnboardingStop)"
+                        "${startRoute.routeShortName} -> ${endRoute.routeShortName} (Transfer Buses: Get off at $transferStop, and walk to $nextOnboardingStop)"
                     } else {
-                        "${startRoute.routeShortName} -> ${endRoute.routeShortName} (Transfer at $transferStop)"
+                        "${startRoute.routeShortName} -> ${endRoute.routeShortName} (Transfer Buses: Get off at $transferStop)"
                     }
                     transferMatches.add(transferMessage)
                 }

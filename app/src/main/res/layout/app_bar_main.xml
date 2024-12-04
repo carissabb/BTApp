@@ -9,7 +9,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="?attr/colorPrimary"
+        android:background="@color/beige"
         app:popupTheme="@style/Theme.BTApp.PopupOverlay" />
 
 </com.google.android.material.appbar.AppBarLayout>
