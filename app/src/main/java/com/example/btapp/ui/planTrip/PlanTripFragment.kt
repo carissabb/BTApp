@@ -246,6 +246,17 @@ class PlanTripFragment : Fragment() {
             "Transit Hub" to setOf(8002, 8003, 8004, 8005, 8006, 8007, 8110, 8111, 8113, 8114, 8115, 8116)
         )
 
+        val separatedHub = mapOf(
+            "Maroon Hub" to setOf(8002, 8003, 8004, 8005, 8006, 8007),
+            "Orange Hub" to setOf(8110, 8111, 8113, 8114, 8115, 8116)
+        )
+
+        fun getHub(stopCode: Int): String? {
+            return separatedHub.entries.firstOrNull { (_, stops) ->
+                stopCode in stops
+            }?.key
+        }
+
         fun areStopsInSameHub(stop1: Int, stop2: Int): Boolean {
             return transitHubGroups.values.any { hub ->
                 (stop1 in hub) && (stop2 in hub)
@@ -265,22 +276,28 @@ class PlanTripFragment : Fragment() {
         startRoutes.forEach { startRoute ->
             val startRouteShortName = startRoute.routeShortName
             if (startRouteShortName != null && endRoutes.any { it.routeShortName == startRouteShortName }) {
-                val startStopCode = startStopCodes.firstOrNull()
-                val startStopName = startStopCode?.let { code ->
+                val currentStartStopCode = startStopCodes.find { stopCode ->
+                    routeToStopsMap[startRouteShortName]?.any { it.stopCode!!.toInt() == stopCode } == true
+                }
+
+                val currentStartStopName = currentStartStopCode?.let { code ->
                     routeToStopsMap[startRouteShortName]?.find { it.stopCode!!.toInt() == code }?.stopName
                 }
 
-                val endStopCode = endStopCodes.firstOrNull()
-                val endStopName = endStopCode?.let { code ->
+                val currentEndStopCode = endStopCodes.find { stopCode ->
+                    routeToStopsMap[startRouteShortName]?.any { it.stopCode!!.toInt() == stopCode } == true
+                }
+
+                val currentEndStopName = currentEndStopCode?.let { code ->
                     routeToStopsMap[startRouteShortName]?.find { it.stopCode!!.toInt() == code }?.stopName
                 }
 
                 tasksRemaining.add(Unit)
-                fetchEarliestDepartureTimeForStop(startRoute.routeShortName, startStopCode.toString()) { earliestTime ->
+                fetchEarliestDepartureTimeForStop(startRoute.routeShortName, currentStartStopCode.toString()) { earliestTime ->
                     if (earliestTime != null) {
                         val directMessage = "$startRouteShortName\n" +
-                                "Start Stop: ${startStopName ?: "Unknown Start Stop"} (#${startStopCode ?: "Unknown"})\n" +
-                                "End Stop: ${endStopName ?: "Unknown End Stop"} (#${endStopCode ?: "Unknown"})\n" +
+                                "Start Stop: ${currentStartStopName ?: "Unknown Start Stop"} (#${currentStartStopCode ?: "Unknown"})\n" +
+                                "End Stop: ${currentEndStopName ?: "Unknown End Stop"} (#${currentEndStopCode ?: "Unknown"})\n" +
                                 "Earliest Departure Time: $earliestTime"
 
                         directMatches.add(directMessage)
@@ -315,32 +332,36 @@ class PlanTripFragment : Fragment() {
                     val nextOnboardingStopName = nextOnboardingStop?.let { endStop ->
                         routeToStopsMap[endRouteShortName]?.find { it.stopCode == endStop }?.stopName
                     }
+                    val currentStartStopCode = startStopCodes.find { stopCode ->
+                        routeToStopsMap[startRouteShortName]?.any { it.stopCode!!.toInt() == stopCode } == true
+                    }
 
-                    val startStopCode = startStopCodes.firstOrNull()
-                    val startStopName = startStopCode?.let { code ->
+                    val currentStartStopName = currentStartStopCode?.let { code ->
                         routeToStopsMap[startRouteShortName]?.find { it.stopCode!!.toInt() == code }?.stopName
                     }
 
-                    val endStopCode = endStopCodes.firstOrNull()
-                    val endStopName = endStopCode?.let { code ->
+                    val currentEndStopCode = endStopCodes.find { stopCode ->
+                        routeToStopsMap[endRouteShortName]?.any { it.stopCode!!.toInt() == stopCode } == true
+                    }
+
+                    val currentEndStopName = currentEndStopCode?.let { code ->
                         routeToStopsMap[endRouteShortName]?.find { it.stopCode!!.toInt() == code }?.stopName
                     }
 
                     tasksRemaining.add(Unit)
-                    fetchEarliestDepartureTimeForStop(startRoute.routeShortName!!, startStopCode.toString()) { earliestStartTime ->
-                        fetchEarliestDepartureTimeForStop(startRoute.routeShortName, transferStopCode) { earliestTransferTime ->
+                    fetchEarliestDepartureTimeForStop(startRoute.routeShortName!!, currentStartStopCode.toString()) { earliestStartTime ->
+                        fetchEarliestDepartureTimeForStop(endRoute.routeShortName!!, currentEndStopCode.toString()) { earliestTransferTime2 ->
                             val transferMessage = if (nextOnboardingStop != null) {
                                 "$startRouteShortName ➜ $endRouteShortName\n" +
-                                        "Start Stop: ${startStopName ?: "Unknown Start Stop"} (#${startStopCode ?: "Unknown"})\n" +
-                                        "End Stop: ${endStopName ?: "Unknown End Stop"} (#${endStopCode ?: "Unknown"})\n" +
+                                        "Start Stop: ${currentStartStopName ?: "Unknown Start Stop"} (#${currentStartStopCode ?: "Unknown"})\n" +
+                                        "End Stop: ${currentEndStopName ?: "Unknown End Stop"} (#${currentEndStopCode ?: "Unknown"})\n" +
                                         "Earliest Departure Time: ${earliestStartTime ?: "Unknown"}\n" +
                                         "Transfer Buses: Get off at ${transferStopName ?: "Unknown Stop"} (#${transferStopCode}), " +
                                         "and walk to ${nextOnboardingStopName ?: "nearby stop"} (#${nextOnboardingStop})\n"
-                                        //"Earliest Transfer Departure Time: ${earliestTransferTime ?: "Unknown"}"
                             } else {
                                 "$startRouteShortName ➜ $endRouteShortName\n" +
-                                        "Start Stop: ${startStopName ?: "Unknown Start Stop"} (#${startStopCode ?: "Unknown"})\n" +
-                                        "End Stop: ${endStopName ?: "Unknown End Stop"} (#${endStopCode ?: "Unknown"})\n" +
+                                        "Start Stop: ${currentStartStopName ?: "Unknown Start Stop"} (#${currentStartStopCode ?: "Unknown"})\n" +
+                                        "End Stop: ${currentEndStopName ?: "Unknown End Stop"} (#${currentEndStopCode ?: "Unknown"})\n" +
                                         "Earliest Departure Time: ${earliestStartTime ?: "Unknown"}\n" +
                                         "Transfer Buses: Get off at ${transferStopName ?: "Unknown Stop"} (#${transferStopCode})"
                             }
