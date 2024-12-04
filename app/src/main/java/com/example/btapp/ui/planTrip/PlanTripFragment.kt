@@ -161,56 +161,63 @@ class PlanTripFragment : Fragment() {
         )
 
         fun areStopsInSameHub(stop1: Int, stop2: Int): Boolean {
-            val inSameHub = transitHubGroups.values.any { hub ->
-                val isStop1InHub = stop1 in hub
-                val isStop2InHub = stop2 in hub
-                isStop1InHub && isStop2InHub
+            return transitHubGroups.values.any { hub ->
+                (stop1 in hub) && (stop2 in hub)
             }
-            return inSameHub
         }
-
 
         val startRoutes = startStopCodes.flatMap { stopCode ->
             stopToRoutesMap[stopCode.toString()] ?: emptyList()
         }
+
         val endRoutes = endStopCodes.flatMap { stopCode ->
             stopToRoutesMap[stopCode.toString()] ?: emptyList()
         }
 
         // Case 1: Direct routes
         startRoutes.forEach { startRoute ->
-            if (endRoutes.any { it.routeShortName == startRoute.routeShortName }) {
-                directMatches.add(startRoute.routeShortName!!)
+            val startRouteShortName = startRoute.routeShortName
+            if (startRouteShortName != null && endRoutes.any { it.routeShortName == startRouteShortName }) {
+                directMatches.add(startRouteShortName)
             }
         }
+
         // Case 2: Transfer routes
         startRoutes.forEach { startRoute ->
-            val startStops = routeToStopsMap[startRoute.routeShortName!!]?.mapNotNull { it.stopCode } ?: emptyList()
+            val startRouteShortName = startRoute.routeShortName
+            val startStops = routeToStopsMap[startRouteShortName]?.mapNotNull { it.stopCode } ?: emptyList()
             endRoutes.forEach { endRoute ->
-                val endStops = routeToStopsMap[endRoute.routeShortName!!]?.mapNotNull { it.stopCode } ?: emptyList()
+                val endRouteShortName = endRoute.routeShortName
+                val endStops = routeToStopsMap[endRouteShortName]?.mapNotNull { it.stopCode } ?: emptyList()
                 val transferStops = startStops.filter { startStop ->
                     endStops.any { endStop ->
-                        //Log.d("TransferCheck", "StartStop: $startStop, EndStop: $endStop, Match: ${startStop == endStop}, SameHub: ${areStopsInSameHub(startStop.toInt(), endStop.toInt())}")
                         startStop == endStop || areStopsInSameHub(startStop.toInt(), endStop.toInt())
                     }
                 }
 
                 if (transferStops.isNotEmpty()) {
-                    val transferStop = transferStops.first()
-
+                    val transferStopCode = transferStops.first()
+                    val transferStopName = routeToStopsMap[startRouteShortName]?.find { it.stopCode == transferStopCode }?.stopName
                     val nextOnboardingStop = endStops.firstOrNull { endStop ->
-                        areStopsInSameHub(transferStop.toInt(), endStop.toInt()) || transferStop == endStop
+                        areStopsInSameHub(transferStopCode.toInt(), endStop.toInt()) || transferStopCode == endStop
+                    }
+                    val nextOnboardingStopName = nextOnboardingStop?.let { endStop ->
+                        routeToStopsMap[endRouteShortName]?.find { it.stopCode == endStop }?.stopName
                     }
 
                     val transferMessage = if (nextOnboardingStop != null) {
-                        "${startRoute.routeShortName} -> ${endRoute.routeShortName} (Transfer Buses: Get off at $transferStop, and walk to $nextOnboardingStop)"
+                        "$startRouteShortName ➜ $endRouteShortName\n" +
+                                "Transfer Buses: Get off at ${transferStopName ?: "Unknown Stop"} (#${transferStopCode}), " +
+                                "and walk to ${nextOnboardingStopName ?: "nearby stop"} (#${nextOnboardingStop})"
                     } else {
-                        "${startRoute.routeShortName} -> ${endRoute.routeShortName} (Transfer Buses: Get off at $transferStop)"
+                        "$startRouteShortName ➜ $endRouteShortName\nj" +
+                                "Transfer Buses: Get off at ${transferStopName ?: "Unknown Stop"} (#${transferStopCode})"
                     }
                     transferMatches.add(transferMessage)
                 }
             }
         }
+
         return (directMatches + transferMatches).toList()
     }
 

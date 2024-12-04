@@ -26,11 +26,12 @@
     <string name="departure_time">Departure Time</string>
     <string name="enter_start_destination">Enter Start Destination</string>
     <string name="enter_end_destination">Enter End Destination</string>
-    <string name="plan_trip">Plan Trip</string>
+    <string name="plan_trip">Find Trip</string>
     <string name="start_nearest_stops">Start Nearest Stops</string>
     <string name="end_nearest_stops">End Nearest Stops</string>
     <string name="matching_routes">Matching Routes</string>
     <string name="weather_info_placeholder" />
     <string name="departure_date">Departure Date</string>
     <string name="route_name">Route Name</string>
+    <string name="suggested_routes">Suggested Route(s)</string>
 </resources>
