@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -95,6 +96,10 @@ class CustomMapFragment : Fragment() {
                 vehicleInfoToMarkerMap,
                 routesViewModel
             )
+
+            routesViewModel.routesList.observe(viewLifecycleOwner) {
+                populateLegend()
+            }
         }
 
 //        // Fetch Data
@@ -256,6 +261,36 @@ class CustomMapFragment : Fragment() {
         val marker = tomTomMap.addMarker(markerOptions)
         Log.d("MarkerInfo", "Adding marker: $marker with BusInfo: $bus")
         vehicleInfoToMarkerMap[bus.agencyVehicleName ?: "Unknown"] = bus
+    }
+
+    private fun populateLegend() {
+        val legendContainer = binding.routeLegendContainer
+        legendContainer.removeAllViews() // Clear existing views
+
+        val context = requireContext()
+        routesViewModel.routesList.value?.forEach { route ->
+            // Inflate the legend item layout
+            val legendItem = LayoutInflater.from(context).inflate(R.layout.legend_item, legendContainer, false)
+
+            // Access the circle and text views
+            val colorView = legendItem.findViewById<View>(R.id.route_color_view)
+            val routeNameText = legendItem.findViewById<TextView>(R.id.route_name_text)
+
+            // Apply the route color dynamically
+            try {
+                val routeColor = "#${route.routeColor}" // Hex color from the route
+                colorView.background.setTint(Color.parseColor(routeColor))
+            } catch (e: IllegalArgumentException) {
+                Log.e("Legend", "Invalid color for route ${route.routeShortName}: ${route.routeColor}", e)
+                colorView.setBackgroundColor(Color.BLACK) // Default to black
+            }
+
+            // Set the route short name
+            routeNameText.text = route.routeShortName
+
+            // Add the legend item to the container
+            legendContainer.addView(legendItem)
+        }
     }
 
     override fun onDestroyView() {

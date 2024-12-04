@@ -58,7 +58,12 @@ class PlanTripViewModel : ViewModel() {
         _routeToStop.value = routeToStop
     }
 
+    private val _arrivalDepartureTimeList = MutableLiveData<List<ArrivalAndDepartureTimesForRoutesResponse>>()
+    val arrivalDepartureTimesList: LiveData<List<ArrivalAndDepartureTimesForRoutesResponse>> = _arrivalDepartureTimeList
 
+    fun setArrivalDepartureTimesList(arrivalDepartureTimes: List<ArrivalAndDepartureTimesForRoutesResponse>) {
+        _arrivalDepartureTimeList.value = arrivalDepartureTimes
+    }
 
     // for get scheduled routes
     val selectedStopCode = MutableLiveData<String>()

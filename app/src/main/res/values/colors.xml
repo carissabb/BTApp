@@ -11,6 +11,7 @@
 
     <!-- Harmonious Neutral Colors -->
     <color name="medium_grey">#B0BEC5</color>
+    <color name="light_beige">#EBE1DC</color>
     <color name="taupe">#8B8589</color>
     <color name="sandy_tan">#D2B48C</color>
     <color name="charcoal_grey">#37474F</color>
