@@ -352,12 +352,29 @@ class PlanTripFragment : Fragment() {
                     fetchEarliestDepartureTimeForStop(startRoute.routeShortName!!, currentStartStopCode.toString()) { earliestStartTime ->
                         fetchEarliestDepartureTimeForStop(endRoute.routeShortName!!, currentEndStopCode.toString()) { earliestTransferTime2 ->
                             val transferMessage = if (nextOnboardingStop != null) {
-                                "$startRouteShortName ➜ $endRouteShortName\n" +
-                                        "Start Stop: ${currentStartStopName ?: "Unknown Start Stop"} (#${currentStartStopCode ?: "Unknown"})\n" +
-                                        "End Stop: ${currentEndStopName ?: "Unknown End Stop"} (#${currentEndStopCode ?: "Unknown"})\n" +
-                                        "Earliest Departure Time: ${earliestStartTime ?: "Unknown"}\n" +
-                                        "Transfer Buses: Get off at ${transferStopName ?: "Unknown Stop"} (#${transferStopCode}), " +
-                                        "and walk to ${nextOnboardingStopName ?: "nearby stop"} (#${nextOnboardingStop})\n"
+                                // Check if both stops are in the same hub
+                                val transferCode = transferStopCode.toInt() ?: -1
+                                val endCode = currentEndStopCode ?: -1
+                                Log.d("PlanTripFragment", "transfer code $transferCode and end code $endCode")
+
+                                // Check if transferCode and endCode belong to the same hub
+                                val isSameHub = separatedHub.values.any { hub ->
+                                    hub.contains(transferCode) and hub.contains(endCode)
+                                }
+
+                                if (isSameHub) {
+                                    "$startRouteShortName\n" +
+                                            "Start Stop: ${currentStartStopName ?: "Unknown Start Stop"} (#${currentStartStopCode ?: "Unknown"})\n" +
+                                            "End Stop: ${currentEndStopName ?: "Unknown End Stop"} (#${currentEndStopCode ?: "Unknown"})\n" +
+                                            "Earliest Departure Time: ${earliestStartTime ?: "Unknown"}"
+                                } else {
+                                    "$startRouteShortName ➜ $endRouteShortName\n" +
+                                            "Start Stop: ${currentStartStopName ?: "Unknown Start Stop"} (#${currentStartStopCode ?: "Unknown"})\n" +
+                                            "End Stop: ${currentEndStopName ?: "Unknown End Stop"} (#${currentEndStopCode ?: "Unknown"})\n" +
+                                            "Earliest Departure Time: ${earliestStartTime ?: "Unknown"}\n" +
+                                            "Transfer Buses: Get off at ${transferStopName ?: "Unknown Stop"} (#${transferStopCode}), " +
+                                            "and walk to ${nextOnboardingStopName ?: "nearby stop"} (#${nextOnboardingStop})\n"
+                                }
                             } else {
                                 "$startRouteShortName ➜ $endRouteShortName\n" +
                                         "Start Stop: ${currentStartStopName ?: "Unknown Start Stop"} (#${currentStartStopCode ?: "Unknown"})\n" +
