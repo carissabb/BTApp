@@ -230,6 +230,36 @@ class MainActivity : AppCompatActivity(){
         }
     }
 
+    @SuppressLint("MissingPermission")
+    private fun showFullCapacityNotification(routeShortName: String, capacity: String) {
+        // this needs to say the name of the routeShortName
+        // need to iterate through the stop lat/long to get slowdown data
+        // then determine what route the slowdown is on and output it here
+        val notificationContent = "Capacity of $routeShortName is $capacity %. Expect a full bus and delays."
+
+        val intent = Intent(this, AlertDetails::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Build the notification
+        val builder = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_marker)
+            .setContentTitle("High Bus Capacity Alert")
+            .setContentText(notificationContent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+
+        // Show the notification
+        with(NotificationManagerCompat.from(this)) {
+            notify(notificationId, builder.build())
+        }
+    }
+
     // traffic flow delay notification
     @SuppressLint("MissingPermission")
     private fun showTrafficSlowdownNotification(currentSpeed: Double, freeFlowSpeed: Double) {
@@ -559,6 +589,9 @@ class MainActivity : AppCompatActivity(){
                     response.body()?.let { busInfoList ->
                         mapViewModel.setBusInfoList(busInfoList)
                         busInfoList.forEach { bus ->
+                            if(bus.percentOfCapacity?.toInt()!! >= 80) {
+                                bus.routeShortName?.let { showFullCapacityNotification(it, bus.percentOfCapacity) }
+                            }
                             Log.d(
                                 "FetchedBus",
                                 "Agency Vehicle Name: ${bus.agencyVehicleName}, Latitude: ${bus.latitude}, Longitude: ${bus.longitude}"
