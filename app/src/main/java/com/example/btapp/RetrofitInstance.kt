@@ -17,14 +17,6 @@ object RetrofitInstance {
 
     val apiService: BTApiService = retrofit.create(BTApiService::class.java)
 
-
-//    // for tomtom to get traffic data
-//    private val retrofitTrafficAPI: Retrofit = Retrofit.Builder()
-//        .baseUrl("https://api.tomtom.com/")
-//        .addConverterFactory(GsonConverterFactory.create())
-//        .build()
-//    val trafficApiService: TrafficApi = retrofitTrafficAPI.create(TrafficApi::class.java)
-
     private val weatherRetrofit: Retrofit = Retrofit.Builder()
         .baseUrl("https://api.open-meteo.com/v1/") // Open-Meteo API base URL
         .addConverterFactory(GsonConverterFactory.create())

@@ -62,7 +62,7 @@ class PlanTripFragment : Fragment() {
 
             if (departureTime.isEmpty()) {
                 val currentTime = System.currentTimeMillis()
-                val defaultTimeInMillis = currentTime + (15 * 60 * 1000) // Add 15 minutes
+                val defaultTimeInMillis = currentTime + (5 * 60 * 1000) // Add 5 minutes
                 val defaultTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(defaultTimeInMillis)
                 departureTime = defaultTime
             }
@@ -75,7 +75,6 @@ class PlanTripFragment : Fragment() {
                 Log.e("PlanTripFragment", "Invalid date/time format: ${e.message}")
                 null
             }
-
 
             val timestamp = convertToUnixTimestamp(departureDate, departureTime)
 
@@ -224,7 +223,7 @@ class PlanTripFragment : Fragment() {
             stopToRoutesMap,
             routeToStopsMap
         ) { matchingRoutes ->
-            // This will be executed once all asynchronous calls are complete
+            // pass data to updateRoutes via viewmodel
             Log.d("DisplayMatchingRoutes", matchingRoutes.toString())
             routesAdapter.updateRoutes(matchingRoutes)
         }
@@ -394,7 +393,7 @@ class PlanTripFragment : Fragment() {
         return try {
             val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
             val parsedDate = formatter.parse("$date $time")
-            parsedDate?.time?.div(1000)
+            parsedDate?.time?.div(1000) // Convert milliseconds to seconds
         } catch (e: Exception) {
             Log.e("PlanTripFragment", "Error parsing date/time: ${e.message}")
             null

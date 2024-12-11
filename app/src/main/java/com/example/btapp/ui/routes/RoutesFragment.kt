@@ -61,7 +61,6 @@ class RoutesFragment : Fragment() {
                     context?.let { ContextCompat.getDrawable(it, R.drawable.divider)?.let { setDrawable(it) } }
                 }
             )
-
         }
         return root
     }

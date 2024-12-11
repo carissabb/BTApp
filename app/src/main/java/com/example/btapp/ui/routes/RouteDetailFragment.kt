@@ -22,7 +22,6 @@ import java.time.format.DateTimeFormatter
 // this is the page for when you click on a specific route
 class RouteDetailFragment : Fragment() {
     //variable definition
-    private var route: CurrentRoutesResponse? = null
     private var _binding: FragmentRouteDetailBinding? = null
     private val binding get() = _binding!!
     private val routesViewModel: RoutesViewModel by activityViewModels()
@@ -38,10 +37,8 @@ class RouteDetailFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentRouteDetailBinding.inflate(inflater, container, false)
-
         // Set up the RecyclerView
         binding.departureTimesRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-
         // Back button listener
         binding.backArrow.setOnClickListener {
             findNavController().popBackStack()  // This will navigate back
@@ -52,7 +49,6 @@ class RouteDetailFragment : Fragment() {
             arguments?.getParcelable<CurrentRoutesResponse>("selectedRoute")
         // Display route details
         binding.routeDetailTextView.text = "${route?.routeShortName}"
-
 
         binding.routeDetailTextView.setOnClickListener {
             route?.routeShortName?.let { onRouteClicked(it) }
@@ -139,9 +135,7 @@ class RouteDetailFragment : Fragment() {
             holder.stopCodeText.text =  "(#${time.stopCode})" // Set the stop code
             holder.departureTimeText.text = formattedTime // Set departure time
         }
-
         override fun getItemCount() = times.size
     }
-
 }
 

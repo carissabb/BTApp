@@ -8,6 +8,7 @@ import com.example.btapp.NearestStopsResponse
 import com.example.btapp.ScheduledRoutesResponse
 import com.example.btapp.ScheduledStopCodesResponse
 
+
 class PlanTripViewModel : ViewModel() {
 
     var onFetchNearestStops: ((Double, Double, Boolean) -> Unit)? = null
@@ -44,8 +45,7 @@ class PlanTripViewModel : ViewModel() {
         _stopToRoute.postValue(map)
     }
 
-    private val _routeToStop = MutableLiveData<Map<String, List<ScheduledStopCodesResponse
-            >>>()
+    private val _routeToStop = MutableLiveData<Map<String, List<ScheduledStopCodesResponse>>>()
     val routeToStops: LiveData<Map<String, List<ScheduledStopCodesResponse>>> get() = _routeToStop
 
     fun setRouteToStopsMap(routeToStop: Map<String, List<ScheduledStopCodesResponse>>) {

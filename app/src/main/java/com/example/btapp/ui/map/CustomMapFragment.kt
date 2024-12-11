@@ -1,8 +1,6 @@
 package com.example.btapp.ui.map
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Bundle
@@ -11,10 +9,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.btapp.BTApiService
 import com.example.btapp.BuildConfig
 import com.example.btapp.BusInfo
 import com.example.btapp.LocationUtil
@@ -26,10 +22,8 @@ import com.tomtom.sdk.map.display.camera.CameraOptions
 import com.tomtom.sdk.location.GeoPoint
 import com.example.btapp.R
 import com.example.btapp.ui.routes.RoutesViewModel
-import com.tomtom.sdk.location.GeoLocation
 import com.tomtom.sdk.map.display.gesture.MapPanningListener
 import com.tomtom.sdk.map.display.image.ImageFactory
-import com.tomtom.sdk.map.display.location.LocationMarkerOptions
 import com.tomtom.sdk.map.display.marker.Marker
 import com.tomtom.sdk.map.display.marker.MarkerOptions
 
@@ -38,7 +32,6 @@ class CustomMapFragment : Fragment() {
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
     private lateinit var tomTomMap: TomTomMap
-    private lateinit var btApiService: BTApiService
     private lateinit var mapViewModel: MapViewModel
     private lateinit var routesViewModel: RoutesViewModel
     private lateinit var tomTomMapFragment: TomTomMapFragment
@@ -101,7 +94,6 @@ class CustomMapFragment : Fragment() {
                 populateLegend()
             }
         }
-
     }
 
     // Helper method to get the route color from RoutesViewModel
@@ -175,11 +167,9 @@ class CustomMapFragment : Fragment() {
             override fun onMapPanningStarted() {
                 Log.d("MapEvent", "Map Panning Started")
             }
-
             override fun onMapPanningOngoing() {
                 Log.d("MapEvent", "Map Panning Ongoing")
             }
-
             override fun onMapPanningEnded() {
                 Log.d("MapEvent", "Map Panning Ended")
             }
@@ -212,7 +202,6 @@ class CustomMapFragment : Fragment() {
         Log.d("Add Marker Parameter", "Latitude: ${bus.latitude}, Longitude: ${bus.longitude}")
         val position = GeoPoint(bus.latitude ?: 0.0, bus.longitude ?: 0.0)
 
-       // val routeColor = bus.routeShortName?.let { mapViewModel.getRouteColor(it) } ?: "#000000" // Default to black if no route color is provided
         // Get the bus icon drawable
         val originalDrawable = context?.getDrawable(R.drawable.ic_marker)?.mutate()
 

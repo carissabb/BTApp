@@ -7,7 +7,7 @@ import com.tomtom.sdk.location.GeoPoint
 
 class LocationUtil(private val context: Context) {
 
-    @SuppressLint("MissingPermission") // Ensure permissions are handled
+    @SuppressLint("MissingPermission")
     fun getUserCurrentLocation(onLocationFetched: (GeoPoint) -> Unit) {
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
@@ -26,16 +26,5 @@ class LocationUtil(private val context: Context) {
             onLocationFetched(fallbackLocation)
         }
     }
-
-//    fun getUserCurrentLocation(
-//        tomTomMap: TomTomMap,
-//        onLocationFetched: (GeoPoint) -> Unit
-//    ) {
-//        val hardcodedLocation = GeoPoint(37.228706, -80.424653) // pamplin hall
-//        Log.d("LocationUtil", "Using hardcoded location: Lat=${hardcodedLocation.latitude}, Long=${hardcodedLocation.longitude}")
-//
-//        // display user icon
-//         onLocationFetched(hardcodedLocation)
-//    }
 }
 

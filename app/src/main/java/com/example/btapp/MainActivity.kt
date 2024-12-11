@@ -42,6 +42,7 @@ import java.util.Locale
  * necessary processes. Most of the API calls are made in this class.
  */
 class MainActivity : AppCompatActivity(){
+    // declare variables
     private lateinit var binding: ActivityMainBinding
     var currentRoutesList: List<CurrentRoutesResponse>? = null
     var arrivalDepartureTimeList: List<ArrivalAndDepartureTimesForRoutesResponse>? = null
@@ -54,11 +55,7 @@ class MainActivity : AppCompatActivity(){
     var stopToRoute = mutableMapOf<String, List<ScheduledRoutesResponse>>()
     var routeToStop = mutableMapOf<String, List<ScheduledStopCodesResponse>>()
 
-    private var weatherCodeReasons = hashMapOf(
-        /*0 to "Clear sky detected",
-        1 to "Mainly clear sky detected",
-        2 to "Partly cloudy sky detected",
-        3 to "Overcast sky detected",*/
+    var weatherCodeReasons = hashMapOf(
         45 to "Fog detected",
         48 to "Depositing rime fog detected",
         51 to "Light drizzle detected",
@@ -161,8 +158,6 @@ class MainActivity : AppCompatActivity(){
         }
     }
 
-
-
     private fun createNotificationChannel() {
         val name = "BTApp Notifications"
         val importance = NotificationManager.IMPORTANCE_DEFAULT
@@ -221,9 +216,6 @@ class MainActivity : AppCompatActivity(){
 
     @SuppressLint("MissingPermission")
     private fun showFullCapacityNotification(routeShortName: String, capacity: String) {
-        // this needs to say the name of the routeShortName
-        // need to iterate through the stop lat/long to get slowdown data
-        // then determine what route the slowdown is on and output it here
         val notificationContent = "Capacity of $routeShortName is $capacity %. Expect a full bus and delays."
 
         val intent = Intent(this, AlertDetails::class.java).apply {
@@ -252,10 +244,7 @@ class MainActivity : AppCompatActivity(){
     // traffic flow delay notification
     @SuppressLint("MissingPermission")
     private fun showTrafficSlowdownNotification(currentSpeed: Double, freeFlowSpeed: Double) {
-        // this needs to say the name of the routeShortName
-        // need to iterate through the stop lat/long to get slowdown data
-        // then determine what route the slowdown is on and output it here
-        val notificationContent = "Slowdown on routeShortName! Current Speed: $currentSpeed km/h, Free Flow Speed: $freeFlowSpeed km/h"
+        val notificationContent = "Slowdown on Route! Current Speed: $currentSpeed km/h, Free Flow Speed: $freeFlowSpeed km/h"
 
         val intent = Intent(this, AlertDetails::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -661,9 +650,6 @@ class MainActivity : AppCompatActivity(){
                             val visibilityMeters = hourly.visibility[closestIndex]
                             val visibilityMiles = convertMetersToMiles(visibilityMeters)
                             val weatherCode = hourly.weathercode[closestIndex]
-                            //val humidity = hourly.relativehumidity_2m[closestIndex]
-                            //val snowfall = hourly.snowfall[closestIndex]
-                            //val cloudCover = hourly.cloudcover[closestIndex]
 
                             val delayReason = getDelayReason(
                                 temperatureFahrenheit,

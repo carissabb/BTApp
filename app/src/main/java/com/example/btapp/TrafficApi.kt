@@ -22,11 +22,10 @@ interface TrafficApi {
     ): IncidentResponse
 }
 
-// Flow Response Data Class
+// load data classes
 data class FlowResponse(
     val flowSegmentData: FlowSegmentData
 )
-
 data class FlowSegmentData(
     val currentSpeed: Double,
     val freeFlowSpeed: Double,
@@ -34,31 +33,23 @@ data class FlowSegmentData(
     val freeFlowTravelTime: Int,
     val confidence: Double
 )
-
-// Incident Response Data Class
 data class IncidentResponse(
     val incidentData: List<IncidentDetails>
 )
-// Incident object
 data class IncidentDetails(
-    val type: String, // e.g., "Feature"
+    val type: String,
     val geometry: Geometry,
     val properties: IncidentProperties
 )
-
-// Geometry object
 data class Geometry(
-    val type: String, // e.g., "LineString"
-    val coordinates: List<List<Double>> // Nested list of lat/lng pairs
+    val type: String,
+    val coordinates: List<List<Double>>
 )
-
-// Properties object
 data class IncidentProperties(
-    val iconCategory: Int // Category of the incident (e.g., accident, roadblock)
+    val iconCategory: Int
 )
 
-
-// Retrofit Setup
+// retrofit Setup
 val retrofitTraffic = Retrofit.Builder()
     .baseUrl("https://api.tomtom.com/")
     .addConverterFactory(GsonConverterFactory.create())

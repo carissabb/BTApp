@@ -1,21 +1,13 @@
 package com.example.btapp
-import android.Manifest
+
 import android.R
 import android.app.IntentService
-import android.app.Notification
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 
-
 class NotificationReceiver : BroadcastReceiver(){
-    fun MyReceiver() {
-    }
-
     override fun onReceive(context: Context, intent: Intent?) {
         val intent1 = Intent(context, NewIntentService::class.java)
         context.startService(intent1)
