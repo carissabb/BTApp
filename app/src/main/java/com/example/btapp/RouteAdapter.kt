@@ -10,7 +10,7 @@ import com.example.btapp.R
 
 class RouteAdapter(
     private val routes: List<CurrentRoutesResponse>,
-    private val onRouteClick: (CurrentRoutesResponse) -> Unit // for on-click listener
+    private val onRouteClick: (CurrentRoutesResponse) -> Unit
 ) : RecyclerView.Adapter<RouteAdapter.RouteViewHolder>() {
 
     inner class RouteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

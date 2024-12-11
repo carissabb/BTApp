@@ -30,6 +30,6 @@ class RoutesAdapter(private val routes: MutableList<String>) :
     fun updateRoutes(newRoutes: List<String>) {
         routes.clear()
         routes.addAll(newRoutes)
-        notifyDataSetChanged()
+        //notifyDataSetChanged()
     }
 }

@@ -14,7 +14,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.btapp.R
 import com.example.btapp.databinding.FragmentRoutesBinding
 
-
+/**
+ * Class where each of the routes gets displayed. Clicked routes are displayed in RouteDetailFragment.
+ */
 class RoutesFragment : Fragment() {
     private var _binding: FragmentRoutesBinding? = null
     private val binding get() = _binding!!

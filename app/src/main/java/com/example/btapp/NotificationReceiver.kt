@@ -10,8 +10,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import kotlinx.coroutines.channels.Channel
 
 
 class NotificationReceiver : BroadcastReceiver(){

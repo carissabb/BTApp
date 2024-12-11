@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import android.os.Parcel
 import android.os.Parcelable
 
+/**
+ * This this the file where the BT API responses are made into usable objects.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true) // to ignore the encapsulation (ie <CurrentRoutes>)
 
 data class ScheduledStopCodesResponse(

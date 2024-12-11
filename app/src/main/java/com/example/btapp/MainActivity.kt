@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -34,14 +33,15 @@ import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 
+/**
+ * This Class houses the main architecture of our app. onCreate starts all
+ * necessary processes. Most of the API calls are made in this class.
+ */
 class MainActivity : AppCompatActivity(){
-    // declare variables
     private lateinit var binding: ActivityMainBinding
     var currentRoutesList: List<CurrentRoutesResponse>? = null
     var arrivalDepartureTimeList: List<ArrivalAndDepartureTimesForRoutesResponse>? = null
@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(){
     var stopToRoute = mutableMapOf<String, List<ScheduledRoutesResponse>>()
     var routeToStop = mutableMapOf<String, List<ScheduledStopCodesResponse>>()
 
-    var weatherCodeReasons = hashMapOf(
+    private var weatherCodeReasons = hashMapOf(
         /*0 to "Clear sky detected",
         1 to "Mainly clear sky detected",
         2 to "Partly cloudy sky detected",
@@ -93,14 +93,12 @@ class MainActivity : AppCompatActivity(){
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED
         ) {
-            // Request permission (for Android 13+)
+            // Request permission
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
                 0
             )
-        } else {
-            //showNotification()
         }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -120,6 +118,7 @@ class MainActivity : AppCompatActivity(){
         // call fetch functions
         fetchBusRoutes()
         fetchBusData()
+
         routesViewModel.selectedRouteShortName.observe(this) { routeShortName ->
             routeShortName?.let {
                 Log.d("MainActivity", "route times updated: $it")
@@ -133,15 +132,6 @@ class MainActivity : AppCompatActivity(){
                 fetchScheduledRoutes(it)
             }
         }
-        /*
-        This section is supposed to handle the changes in the stopcode list fetch the related routes.
-        You'll see the corresponsing lines in PlanTripFragment
-         */
-//        planTripViewModel.selectedStopCode.observe(this) { stopCodes ->
-//            stopCodes?.split(",")?.forEach { stopCode ->
-//                fetchScheduledRoutes(stopCode.trim())
-//            }
-//        }
 
         planTripViewModel.onFetchNearestStops = { latitude, longitude, isStart ->
             fetchNearestStops(latitude, longitude, isStart)
@@ -175,7 +165,6 @@ class MainActivity : AppCompatActivity(){
 
     private fun createNotificationChannel() {
         val name = "BTApp Notifications"
-        val descriptionText = "Channel for BTApp notifications"
         val importance = NotificationManager.IMPORTANCE_DEFAULT
         val channel = NotificationChannel(channelId, name, importance)
         val notificationManager: NotificationManager =
@@ -643,26 +632,6 @@ class MainActivity : AppCompatActivity(){
             }
         })
     }
-
-    /*private fun fetchAllPlaces() {
-        val call = RetrofitInstance.apiService.getAllPlaces()
-        call.enqueue(object : Callback<List<AllPlacesResponse>> {
-            override fun onResponse(call: Call<List<AllPlacesResponse>>, response: Response<List<AllPlacesResponse>>) {
-                if (response.isSuccessful) {
-                    response.body()?.let { places ->
-                        Log.d("MainActivity", "All places fetched: $places")
-                    }
-                } else {
-                    Log.e("MainActivity", "Error fetching places: ${response.code()} - ${response.message()}")
-                }
-            }
-
-            override fun onFailure(call: Call<List<AllPlacesResponse>>, t: Throwable) {
-                Log.e("MainActivity", "Failed to fetch places: ${t.message}")
-            }
-        })
-    }*/
-
 
     private fun fetchWeatherData(latitude: Double, longitude: Double, timestamp: Long) {
         val dateTime = SimpleDateFormat("yyyy-MM-dd'T'HH:00", Locale.getDefault()).format(timestamp * 1000)

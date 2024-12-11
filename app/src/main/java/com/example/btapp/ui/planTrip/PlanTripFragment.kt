@@ -30,7 +30,6 @@ import java.util.Locale
 class PlanTripFragment : Fragment() {
     private lateinit var planTripViewModel: PlanTripViewModel
     private lateinit var binding: FragmentPlanTripBinding
-    var scheduledRouteList: List<ScheduledRoutesResponse>? = null
     private lateinit var routesAdapter: RoutesAdapter
     private var userSpecifiedTime: ZonedDateTime? = null
 
@@ -107,12 +106,11 @@ class PlanTripFragment : Fragment() {
         binding.matchingRoutesRecycler.adapter = routesAdapter
 
         /**
-         * So right now I have it so that each time 5 stops are taken, fetchScheduled route is called for each one.
-         * Go to fetchScheduledRoutes below for more context
-         * Commented line should ping the commented out observer in main
+         * The two nearest stops to the start and end destination are found. From there, the startAdapter
+         * updated and the matchingRoutes algorithm is called.
          */
         planTripViewModel.startDestinationNearestStopsList.observe(viewLifecycleOwner) { nearestStops ->
-            // Limit to 5 nearest stops
+            // Limit to 2 nearest stops
             val limitedStops = nearestStops.take(2) // change for out many results you want
             val stopNames = limitedStops.mapNotNull { stop ->
                 stop.stopName?.let { "${it} (#${stop.stopCode})" }
@@ -122,7 +120,7 @@ class PlanTripFragment : Fragment() {
         }
 
         planTripViewModel.endDestinationNearestStopsList.observe(viewLifecycleOwner) { nearestStops ->
-            // Limit to 5 nearest stops
+            // Limit to 2 nearest stops
             val limitedStops = nearestStops.take(2) // change for out many results you want
             val stopNames = limitedStops.mapNotNull { stop ->
                 stop.stopName?.let { "${it} (#${stop.stopCode})" }
@@ -131,12 +129,6 @@ class PlanTripFragment : Fragment() {
             calculateAndDisplayMatchingRoutes()
 
         }
-
-        // Set the RecyclerView adapters after initializing the adapters
-        //.startStopsRecycler.layoutManager = LinearLayoutManager(context)
-        //binding.startStopsRecycler.adapter = startAdapter
-        //binding.endStopsRecycler.layoutManager = LinearLayoutManager(context)
-        //binding.endStopsRecycler.adapter = endAdapter
     }
 
     private fun isWeekday(): Boolean {
@@ -144,6 +136,10 @@ class PlanTripFragment : Fragment() {
         return dayOfWeek != java.util.Calendar.SATURDAY && dayOfWeek != java.util.Calendar.SUNDAY
     }
 
+    /**
+     * Given a route and stopCode, there was no away to access the departure times,
+     * which is why an API call is needed here.
+     */
     private fun fetchEarliestDepartureTimeForStop(
         routeShortName: String,
         stopCode: String,
@@ -204,6 +200,9 @@ class PlanTripFragment : Fragment() {
         })
     }
 
+    /**
+     * Route finding algorithm. Global variables are called for referencing.
+     */
     private fun calculateAndDisplayMatchingRoutes() {
         val startStopCodes = planTripViewModel.startDestinationNearestStopsList.value?.mapNotNull { it.stopCode } ?: emptyList()
         val endStopCodes = planTripViewModel.endDestinationNearestStopsList.value?.mapNotNull { it.stopCode } ?: emptyList()
@@ -250,12 +249,6 @@ class PlanTripFragment : Fragment() {
             "Maroon Hub" to setOf(8002, 8003, 8004, 8005, 8006, 8007),
             "Orange Hub" to setOf(8110, 8111, 8113, 8114, 8115, 8116)
         )
-
-        fun getHub(stopCode: Int): String? {
-            return separatedHub.entries.firstOrNull { (_, stops) ->
-                stopCode in stops
-            }?.key
-        }
 
         fun areStopsInSameHub(stop1: Int, stop2: Int): Boolean {
             return transitHubGroups.values.any { hub ->
@@ -401,7 +394,7 @@ class PlanTripFragment : Fragment() {
         return try {
             val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
             val parsedDate = formatter.parse("$date $time")
-            parsedDate?.time?.div(1000) // Convert milliseconds to seconds
+            parsedDate?.time?.div(1000)
         } catch (e: Exception) {
             Log.e("PlanTripFragment", "Error parsing date/time: ${e.message}")
             null

@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.lifecycle.ViewModelProvider
 import com.example.btapp.BusInfo
 import com.example.btapp.R
 import com.example.btapp.ui.routes.RoutesViewModel
